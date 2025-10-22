@@ -201,9 +201,18 @@ export default function LoginPage() {
         doRedirect(redirectPath);
       } else {
         // Handle API error
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (jsonErr) {
+          errorData = { message: "Login failed" };
+        }
         setLocalError(errorData.message || "Login failed");
-        console.error("Login API error:", errorData);
+        if (typeof errorData === "object" && errorData !== null) {
+          console.error("Login API error:", errorData);
+        } else {
+          console.error("Login API error: Non-object response", errorData);
+        }
       }
     } catch (err) {
       console.error("Login submission error:", err);

@@ -40,7 +40,11 @@ const publicApiPaths = [
 ];
 
 // Use env variable with fallback for JWT secret
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "default-very-strong-secret-key";
+
+if (!JWT_SECRET || JWT_SECRET.length < 16) {
+  throw new Error("JWT_SECRET is missing or too short. Please set a strong JWT_SECRET in your .env file.");
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

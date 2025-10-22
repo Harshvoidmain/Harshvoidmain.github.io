@@ -320,14 +320,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Server error: Invalid response format");
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        // Non-JSON response or parse error
+        const text = await response.text();
+        setError("Login failed: Server error or invalid response");
+        console.error("Login API error: Non-JSON response", text);
+        throw new Error("Login failed: Server error or invalid response");
+      }
       console.log(
         "Login response:",
         data.success ? "Success" : "Failed",
-        data.success ? `User role: ${data.user.role}` : `Error: ${data.message}`
+        data.success ? `User role: ${data.user?.role}` : `Error: ${data.message}`
       );
 
       if (!response.ok) {
+        setError(data.message || "Login failed");
+        console.error("Login API error:", data);
         throw new Error(data.message || "Login failed");
       }
 

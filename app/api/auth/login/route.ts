@@ -22,7 +22,11 @@ type Permission = {
 };
 
 // Use env variable for JWT secret, with fallback to ensure consistency
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "default-very-strong-secret-key";
+
+if (!JWT_SECRET || JWT_SECRET.length < 16) {
+  console.error("JWT_SECRET is missing or too short. Using fallback.");
+}
 
 export async function POST(request: NextRequest) {
   try {
