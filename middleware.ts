@@ -32,6 +32,7 @@ const publicApiPaths = [
   "/api/debug/direct-login",
   "/api/debug/fix-database",
   "/api/debug/enhance-citations-schema",
+  "/api/debug/seed-publications", // Public for seeding dummy data
   "/api/doi",
   "/api/faculty/check-exists",
   "/api/departments",

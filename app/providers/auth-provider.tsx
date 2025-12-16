@@ -58,6 +58,9 @@ const publicRoutes = [
   "/_next", // Static Next.js resources
   "/api/auth", // Auth API routes
   "/api/debug", // Debug API routes
+  "/api/dashboard",
+  "/api/reports",
+  "/api/publications/report",
   "/images", // Static resources
   "/favicon.ico",
 ];
@@ -65,6 +68,8 @@ const publicRoutes = [
 // Define role-based route access with more specific paths
 const roleAccess: Record<string, UserRole[]> = {
   "/dashboard": ["admin", "hod", "faculty", "staff", "student" , "department"],
+  "/dashboard/publications": ["admin", "hod", "faculty", "staff", "student", "department"], // TEMPORARY FOR TESTING - Allow all roles
+  "/reports/publications": ["admin", "hod", "faculty", "staff", "student", "department"], // TEMPORARY FOR TESTING - Allow all roles
   "/faculty": ["admin", "hod", "faculty", "staff", "student" , "department" ],
   "/faculty/add": ["admin", "hod", "faculty" , "department"],
   "/faculty/edit": ["admin", "hod", "faculty" , "department"],
