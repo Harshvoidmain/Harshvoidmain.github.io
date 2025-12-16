@@ -37,6 +37,10 @@ const publicApiPaths = [
   "/api/departments",
   "/api/faculty/autocomplete",
   "/api/admin/fix-user-role", // Temporarily public for fixing user roles
+  "/api/publications/fetch-doi", // DOI fetching (public for testing)
+  "/api/publications/add", // Publications CRUD (public for testing)
+  "/api/publications/upload-file", // File upload (public for testing)
+  "/api/publications/stats", // Statistics (public for testing)
 ];
 
 // Use env variable with fallback for JWT secret
