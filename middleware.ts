@@ -11,7 +11,6 @@ const publicPaths = [
   "/forgot-password",
   "/reset-password",
   "/unauthorized",
-  "/unauthorized",
   "/_next",
   "/images",
   "/fonts",
@@ -38,7 +37,6 @@ const publicApiPaths = [
   "/api/faculty/check-exists",
   "/api/departments",
   "/api/faculty/autocomplete",
-  "/api/admin/fix-user-role", // Temporarily public for fixing user roles
   "/api/admin/fix-user-role", // Temporarily public for fixing user roles
 ];
 
