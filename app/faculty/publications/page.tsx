@@ -36,6 +36,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
+import PublicationCategoryChart from "@/app/components/faculty/PublicationCategoryChart";
+import {
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 interface Publication {
   id: number;
@@ -108,6 +113,7 @@ export default function FacultyPublicationsPage() {
     useState<Publication | null>(null);
   const [preScreenDoi, setPreScreenDoi] = useState("");
   const [selectedCoAuthors, setSelectedCoAuthors] = useState<Faculty[]>([]);
+  const [isPublicationsDropdownOpen, setIsPublicationsDropdownOpen] = useState(false);
   const [formData, setFormData] = useState<PublicationFormData>({
     title: "",
     authors: "",
@@ -652,14 +658,56 @@ export default function FacultyPublicationsPage() {
         </div>
 
         {/* Main content */}
+        {/* Pie Charts Section */}
+        {!loading && !error && publications.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardContent className="pt-6">
+                <PublicationCategoryChart
+                  publications={publications}
+                  title="All Publications by Category"
+                  subtitle="Total distribution across all publication types"
+                  height={300}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <PublicationCategoryChart
+                  publications={publications}
+                  title="Current Year Publications"
+                  subtitle={`Publications from ${new Date().getFullYear()}`}
+                  height={300}
+                  filterByYear={new Date().getFullYear()}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Publications Dropdown Section */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-indigo-600" />
-              Your Publications
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsPublicationsDropdownOpen(!isPublicationsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-indigo-600" />
+                Your Publications
+                <span className="text-sm font-normal text-gray-500">
+                  ({publications.length} publications)
+                </span>
+              </div>
+              {isPublicationsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          {isPublicationsDropdownOpen && (
+            <CardContent>
             {loading ? (
               <p>Loading publications...</p>
             ) : error ? (
@@ -744,7 +792,8 @@ export default function FacultyPublicationsPage() {
                 ))}
               </div>
             )}
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
 
