@@ -78,11 +78,17 @@ export async function GET(request: NextRequest) {
         doi VARCHAR(100),
         url VARCHAR(1000),
         citation_count INT,
+        status TINYINT NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX (faculty_id),
         CONSTRAINT fk_faculty_publications_faculty FOREIGN KEY (faculty_id) REFERENCES faculty(F_id)
       )`); // First try the faculty_publications table
+      try {
+        await query(
+          `ALTER TABLE faculty_publications ADD COLUMN status TINYINT NOT NULL DEFAULT 1`
+        );
+      } catch (e) { }
       const publications = (await query(
         `SELECT 
           id,
@@ -105,7 +111,7 @@ export async function GET(request: NextRequest) {
         FROM 
           faculty_publications
         WHERE 
-          faculty_id = ?
+          faculty_id = ? AND status = 1
         ORDER BY 
           publication_date DESC`,
         [queryFacultyId]
@@ -202,6 +208,13 @@ export async function GET(request: NextRequest) {
       }
 
       console.log(`Total publications found: ${allPublications.length}`);
+      try {
+        allPublications.sort((a: any, b: any) => {
+          const ay = new Date(a.publication_date).getTime();
+          const by = new Date(b.publication_date).getTime();
+          return by - ay;
+        });
+      } catch { }
 
       // Return the combined publications data
       return NextResponse.json({
@@ -376,18 +389,24 @@ export async function POST(request: NextRequest) {
       doi VARCHAR(100),
       url VARCHAR(1000),
       citation_count INT,
+      status TINYINT NOT NULL DEFAULT 1,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX (faculty_id),
       CONSTRAINT fk_faculty_publications_faculty FOREIGN KEY (faculty_id) REFERENCES faculty(F_id)
     )`);
+    try {
+      await query(
+        `ALTER TABLE faculty_publications ADD COLUMN status TINYINT NOT NULL DEFAULT 1`
+      );
+    } catch (e) { }
 
     // Insert the publication
     const result = await query(
       `INSERT INTO faculty_publications 
-        (faculty_id, title, abstract, authors, publication_date, publication_type, publication_venue, doi, url, citation_count, 
+        (faculty_id, title, abstract, authors, publication_date, publication_type, publication_venue, doi, url, citation_count, status, 
          citations_crossref, citations_semantic_scholar, citations_google_scholar, citations_web_of_science, citations_scopus, citations_last_updated) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)`,
       [
         publicationFacultyId,
         title,
@@ -406,9 +425,9 @@ export async function POST(request: NextRequest) {
         citations_scopus || null,
         citations_last_updated
           ? new Date(citations_last_updated)
-              .toISOString()
-              .slice(0, 19)
-              .replace("T", " ")
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " ")
           : null,
       ]
     );
@@ -427,8 +446,8 @@ export async function POST(request: NextRequest) {
         // Also create a duplicate publication record for each co-author
         await query(
           `INSERT INTO faculty_publications 
-            (faculty_id, title, abstract, authors, publication_date, publication_type, publication_venue, doi, url, citation_count) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (faculty_id, title, abstract, authors, publication_date, publication_type, publication_venue, doi, url, citation_count, status) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
           [
             co_authors[i],
             title,
@@ -517,6 +536,7 @@ export async function PUT(request: NextRequest) {
       url,
       citation_count,
       faculty_id: requestFacultyId,
+      co_authors,
       // New citation fields
       citations_crossref,
       citations_semantic_scholar,
@@ -651,13 +671,37 @@ export async function PUT(request: NextRequest) {
         citations_scopus || null,
         citations_last_updated
           ? new Date(citations_last_updated)
-              .toISOString()
-              .slice(0, 19)
-              .replace("T", " ")
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " ")
           : null,
         id,
       ]
     );
+
+    // Ensure co-authors table exists
+    await query(`CREATE TABLE IF NOT EXISTS publication_co_authors (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      publication_id INT NOT NULL,
+      faculty_id BIGINT NOT NULL,
+      author_order INT NOT NULL,
+      INDEX (publication_id),
+      FOREIGN KEY (publication_id) REFERENCES faculty_publications(id)
+    )`);
+    // Update co-authors mapping if provided
+    if (Array.isArray(co_authors)) {
+      await query(
+        `DELETE FROM publication_co_authors WHERE publication_id = ?`,
+        [id]
+      );
+      for (let i = 0; i < co_authors.length; i++) {
+        await query(
+          `INSERT INTO publication_co_authors (publication_id, faculty_id, author_order)
+           VALUES (?, ?, ?)`,
+          [id, co_authors[i], i + 2]
+        );
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -780,12 +824,14 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Delete the publication
-    await query("DELETE FROM faculty_publications WHERE id = ?", [id]);
+    // Soft delete the publication by setting status = 0
+    await query("UPDATE faculty_publications SET status = 0 WHERE id = ?", [
+      id,
+    ]);
 
     return NextResponse.json({
       success: true,
-      message: "Publication deleted successfully",
+      message: "Publication hidden successfully",
     });
   } catch (error) {
     console.error("Error deleting publication:", error);

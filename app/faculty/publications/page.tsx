@@ -33,6 +33,8 @@ import {
   Link,
   Search,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
@@ -103,6 +105,7 @@ export default function FacultyPublicationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [doiPreScreenOpen, setDoiPreScreenOpen] = useState(false);
+  const [expandedPublicationId, setExpandedPublicationId] = useState<number | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -388,6 +391,7 @@ export default function FacultyPublicationsPage() {
       const payload = {
         id: selectedPublication.id, // Include the ID in the request body
         ...formData,
+        co_authors: selectedCoAuthors.map((ca) => ca.id),
         citation_count: formData.citation_count
           ? parseInt(formData.citation_count)
           : null,
@@ -500,10 +504,18 @@ export default function FacultyPublicationsPage() {
 
   const handleEdit = () => {
     if (selectedPublication) {
+      const toYMD = (ds: string) => {
+        const d = new Date(ds);
+        if (isNaN(d.getTime())) return ds;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      };
       setFormData({
         title: selectedPublication.title,
         authors: selectedPublication.authors,
-        publication_date: selectedPublication.publication_date,
+        publication_date: toYMD(selectedPublication.publication_date),
         publication_type: selectedPublication.publication_type,
         publication_venue: selectedPublication.publication_venue,
         doi: selectedPublication.doi || "",
@@ -720,76 +732,234 @@ export default function FacultyPublicationsPage() {
                 create one.
               </p>
             ) : (
-              <div className="space-y-4">
-                {publications.map((publication) => (
-                  <div
-                    key={publication.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex justify-between mb-2">
-                      <div
-                        className={`px-2 py-1 text-xs rounded-full ${getPublicationTypeColor(
-                          publication.publication_type
-                        )}`}
-                      >
-                        {getPublicationTypeLabel(publication.publication_type)}
-                      </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {renderCitationSources(publication).map(
-                          (source, index) => (
-                            <span
-                              key={index}
-                              className={`text-xs px-2 py-1 rounded-full ${source.color}`}
-                            >
-                              {source.name}: {source.count}
-                            </span>
-                          )
-                        )}
-                      </div>
-                    </div>
-                    <h3 className="font-medium">{publication.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {publication.authors}
-                    </p>
-                    <div className="mt-2 text-xs text-gray-500">
-                      {publication.publication_venue},{" "}
-                      {formatDate(publication.publication_date)}
-                    </div>
-                    <div className="flex justify-between mt-3">
-                      <div className="flex items-center gap-2">
-                        {publication.doi && (
-                          <a
-                            href={`https://doi.org/${publication.doi}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                          >
-                            <Link className="h-3 w-3" />
-                            DOI
-                          </a>
-                        )}
-                        {publication.url && (
-                          <a
-                            href={publication.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                          >
-                            <Link className="h-3 w-3" />
-                            URL
-                          </a>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(publication)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-6">
+                <div className="overflow-x-auto rounded border">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700">
+                        <th className="px-3 py-2 w-8"></th>
+                        <th className="text-left px-3 py-2 w-12">#</th>
+                        <th className="text-left px-3 py-2">Title</th>
+                        <th className="text-left px-3 py-2">Category</th>
+                        <th className="text-left px-3 py-2">Year</th>
+                        <th className="text-left px-3 py-2">Edit</th>
+                        <th className="text-left px-3 py-2">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...publications]
+                        .sort(
+                          (a, b) =>
+                            new Date(b.publication_date).getTime() -
+                            new Date(a.publication_date).getTime()
+                        )
+                        .map((p, idx) => {
+                          const year =
+                            p.publication_date &&
+                            !isNaN(new Date(p.publication_date).getTime())
+                              ? new Date(p.publication_date).getFullYear()
+                              : "-";
+                          const isExpanded = expandedPublicationId === p.id;
+                          return (
+                            <>
+                              <tr
+                                key={`row-${p.id}`}
+                                className={`border-t cursor-pointer hover:bg-gray-50 ${
+                                  isExpanded ? "bg-gray-50" : ""
+                                }`}
+                                onClick={() =>
+                                  setExpandedPublicationId(
+                                    isExpanded ? null : p.id
+                                  )
+                                }
+                              >
+                                <td className="px-3 py-2">
+                                  {isExpanded ? (
+                                    <ChevronUp className="h-4 w-4 text-gray-500" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                                  )}
+                                </td>
+                                <td className="px-3 py-2">{idx + 1}</td>
+                                <td className="px-3 py-2 font-medium">
+                                  {p.title}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <span
+                                    className={`px-2 py-1 text-xs rounded-full ${getPublicationTypeColor(
+                                      p.publication_type
+                                    )}`}
+                                  >
+                                    {getPublicationTypeLabel(p.publication_type)}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2">{year}</td>
+                                <td className="px-3 py-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const toYMD = (ds: string) => {
+                                        const d = new Date(ds);
+                                        if (isNaN(d.getTime())) return ds;
+                                        const y = d.getFullYear();
+                                        const m = String(d.getMonth() + 1).padStart(
+                                          2,
+                                          "0"
+                                        );
+                                        const day = String(d.getDate()).padStart(
+                                          2,
+                                          "0"
+                                        );
+                                        return `${y}-${m}-${day}`;
+                                      };
+                                      try {
+                                        const response = await fetch(
+                                          `/api/faculty/publications/${p.id}/co-authors`
+                                        );
+                                        const data = await response.json();
+                                        if (data.success) {
+                                          setSelectedCoAuthors(data.data || []);
+                                        } else {
+                                          setSelectedCoAuthors([]);
+                                        }
+                                      } catch {
+                                        setSelectedCoAuthors([]);
+                                      }
+                                      setSelectedPublication(p);
+                                      setFormData({
+                                        title: p.title,
+                                        authors: p.authors,
+                                        publication_date: toYMD(p.publication_date),
+                                        publication_type: p.publication_type,
+                                        publication_venue: p.publication_venue,
+                                        doi: p.doi || "",
+                                        url: p.url || "",
+                                        citation_count:
+                                          p.citation_count?.toString() || "",
+                                        citations_crossref: p.citations_crossref,
+                                        citations_semantic_scholar:
+                                          p.citations_semantic_scholar,
+                                        citations_google_scholar:
+                                          p.citations_google_scholar,
+                                        citations_web_of_science:
+                                          p.citations_web_of_science,
+                                        citations_scopus: p.citations_scopus,
+                                        citations_last_updated:
+                                          p.citations_last_updated,
+                                      });
+                                      setEditDialogOpen(true);
+                                    }}
+                                  >
+                                    Edit
+                                  </Button>
+                                </td>
+                                <td className="px-3 py-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedPublication(p);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                  >
+                                    Delete
+                                  </Button>
+                                </td>
+                              </tr>
+                              {isExpanded && (
+                                <tr
+                                  key={`details-${p.id}`}
+                                  className="bg-gray-50 border-t border-gray-100"
+                                >
+                                  <td colSpan={7} className="px-4 py-4">
+                                    <div className="pl-8 space-y-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                          <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                            Authors
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            {p.authors}
+                                          </p>
+                                        </div>
+                                        <div>
+                                          <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                            Venue
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            {p.publication_venue}
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      {p.abstract && (
+                                        <div>
+                                          <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                            Abstract
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            {p.abstract}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      <div className="flex flex-wrap gap-4 items-center">
+                                        {p.doi && (
+                                          <a
+                                            href={`https://doi.org/${p.doi}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                                          >
+                                            <Link className="h-3 w-3" />
+                                            DOI: {p.doi}
+                                          </a>
+                                        )}
+                                        {p.url && (
+                                          <a
+                                            href={p.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                                          >
+                                            <Link className="h-3 w-3" />
+                                            URL
+                                          </a>
+                                        )}
+                                      </div>
+
+                                      <div className="pt-2 border-t border-gray-200">
+                                        <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                                          Citations
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                          {renderCitationSources(p).map(
+                                            (source, index) => (
+                                              <span
+                                                key={index}
+                                                className={`text-xs px-2 py-1 rounded-full ${source.color}`}
+                                              >
+                                                {source.name}: {source.count}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+
               </div>
             )}
             </CardContent>
@@ -989,153 +1159,7 @@ export default function FacultyPublicationsPage() {
         </div>
       </DialogForm>
 
-      {/* View Publication Dialog */}
-      <DialogForm
-        title="Publication Details"
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        onSubmit={(e) => {
-          e.preventDefault();
-          setViewDialogOpen(false);
-        }}
-        submitLabel="Close"
-        showCancel={false}
-      >
-        {selectedPublication && (
-          <div className="space-y-4">
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={handleEdit}
-              >
-                <Pencil size={14} />
-                Edit
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={handleDeleteClick}
-              >
-                <Trash size={14} />
-                Delete
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Label>Title</Label>
-              <p className="text-sm">{selectedPublication.title}</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Authors</Label>
-              <p className="text-sm">{selectedPublication.authors}</p>
-            </div>
-            {selectedPublication.abstract && (
-              <div className="space-y-2">
-                <Label>Abstract</Label>
-                <p className="text-sm">{selectedPublication.abstract}</p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Publication Date</Label>
-                <p className="text-sm">
-                  {formatDate(selectedPublication.publication_date)}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>Publication Type</Label>
-                <div
-                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPublicationTypeColor(
-                    selectedPublication.publication_type
-                  )}`}
-                >
-                  {getPublicationTypeLabel(
-                    selectedPublication.publication_type
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Publication Venue</Label>
-              <p className="text-sm">{selectedPublication.publication_venue}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>DOI</Label>
-                {selectedPublication.doi ? (
-                  <a
-                    href={`https://doi.org/${selectedPublication.doi}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                  >
-                    {selectedPublication.doi}
-                    <Link className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <p className="text-sm text-gray-500">Not provided</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>URL</Label>
-                {selectedPublication.url ? (
-                  <a
-                    href={selectedPublication.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                  >
-                    Visit Link
-                    <Link className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <p className="text-sm text-gray-500">Not provided</p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Citation Count</Label>
-              <div className="space-y-2">
-                {renderCitationSources(selectedPublication).length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {renderCitationSources(selectedPublication).map(
-                      (source, index) => (
-                        <div
-                          key={index}
-                          className={`px-3 py-2 rounded-lg ${source.color}`}
-                        >
-                          <div className="font-medium text-sm">
-                            {source.name}
-                          </div>
-                          <div className="text-lg font-bold">
-                            {source.count}
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">
-                    No citation data available
-                  </p>
-                )}
-                {selectedPublication.citations_last_updated && (
-                  <p className="text-xs text-gray-400">
-                    Last updated:{" "}
-                    {new Date(
-                      selectedPublication.citations_last_updated
-                    ).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </DialogForm>
+
 
       {/* Edit Publication Dialog */}
       <DialogForm
@@ -1284,10 +1308,9 @@ export default function FacultyPublicationsPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Hide this publication?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              publication from your profile.
+              This will hide the publication from your profile. The record remains in the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1296,7 +1319,7 @@ export default function FacultyPublicationsPage() {
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              Hide
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
