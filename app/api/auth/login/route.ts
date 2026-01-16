@@ -162,9 +162,11 @@ export async function POST(request: NextRequest) {
     const { password: _, is_active, ...userWithoutPassword } = user;
 
     // Determine redirect URL based on user role
-    let redirectUrl = "/dashboard"; // Default for regular users
+    let redirectUrl = "/dashboard"; // Default for regular users and admins
     if (user.role === "hod" || user.role === "department") {
       redirectUrl = "/departments/dashboard";
+    } else if (user.role === "faculty") {
+      redirectUrl = "/faculty/dashboard";
     }
 
     // Create the response

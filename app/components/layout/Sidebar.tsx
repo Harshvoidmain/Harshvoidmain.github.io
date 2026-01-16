@@ -42,6 +42,14 @@ const getSidebarItems = (userRole: string | undefined): SidebarItem[] => {
     ];
   }
 
+  if (userRole === "faculty") {
+    return [
+      { title: "Dashboard", href: "/faculty/dashboard", icon: HomeIcon },
+      { title: "Faculty", href: "/faculty", icon: UsersIcon },
+      { title: "Reports Generation", href: "/faculty/reports", icon: DocumentTextIcon },
+    ];
+  }
+
   // For all other roles (admin, faculty, etc.)
   const commonItems: SidebarItem[] = [
     { title: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -134,6 +142,8 @@ export default function Sidebar() {
           href={
             user?.role === "hod" || user?.role === "department"
               ? "/departments/dashboard"
+              : user?.role === "faculty"
+              ? "/faculty/dashboard"
               : "/dashboard"
           }
           className="flex items-center gap-2 font-semibold"

@@ -39,11 +39,6 @@ import {
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
 import PublicationCategoryChart from "@/app/components/faculty/PublicationCategoryChart";
-import {
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
-
 interface Publication {
   id: number;
   faculty_id: string;
