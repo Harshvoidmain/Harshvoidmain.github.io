@@ -154,6 +154,87 @@ export default function FacultyDashboardPage() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [publicationCount, setPublicationCount] = useState(0);
   const [researchProjectCount, setResearchProjectCount] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Function to refresh all data
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log("Dashboard - Refreshing data...");
+
+      const pubResponse = await fetch("/api/faculty/publications", {
+        cache: "no-store",
+      });
+      if (pubResponse.ok) {
+        const pubData = await pubResponse.json();
+        if (pubData.success && Array.isArray(pubData.data)) {
+          console.log("Dashboard - Refreshed publications:", pubData.data.length);
+          setFetchedPublications(pubData.data);
+          setPublicationCount(pubData.data.length);
+        }
+      }
+
+      const projResponse = await fetch("/api/faculty/research-projects", {
+        cache: "no-store",
+      });
+      if (projResponse.ok) {
+        const projData = await projResponse.json();
+        if (projData.success && Array.isArray(projData.data)) {
+          console.log("Dashboard - Refreshed research projects:", projData.data.length);
+          setFetchedResearchProjects(projData.data);
+          setResearchProjectCount(projData.data.length);
+        }
+      }
+
+      const contribResponse = await fetch("/api/faculty/contributions", {
+        cache: "no-store",
+      });
+      if (contribResponse.ok) {
+        const contribData = await contribResponse.json();
+        if (contribData.success && Array.isArray(contribData.data)) {
+          console.log("Dashboard - Refreshed contributions:", contribData.data.length);
+          setFetchedContributions(contribData.data);
+        }
+      }
+
+      const workshopResponse = await fetch("/api/faculty/workshops", {
+        cache: "no-store",
+      });
+      if (workshopResponse.ok) {
+        const workshopData = await workshopResponse.json();
+        if (workshopData.success && Array.isArray(workshopData.data)) {
+          console.log("Dashboard - Refreshed workshops:", workshopData.data.length);
+          setFetchedWorkshops(workshopData.data);
+        }
+      }
+
+      const membershipResponse = await fetch("/api/faculty/memberships", {
+        cache: "no-store",
+      });
+      if (membershipResponse.ok) {
+        const membershipData = await membershipResponse.json();
+        if (membershipData.success && Array.isArray(membershipData.data)) {
+          console.log("Dashboard - Refreshed memberships:", membershipData.data.length);
+          setFetchedMemberships(membershipData.data);
+        }
+      }
+
+      const awardResponse = await fetch("/api/faculty/awards", {
+        cache: "no-store",
+      });
+      if (awardResponse.ok) {
+        const awardData = await awardResponse.json();
+        if (awardData.success && Array.isArray(awardData.data)) {
+          console.log("Dashboard - Refreshed awards:", awardData.data.length);
+          setFetchedAwards(awardData.data);
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing dashboard data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Generate placeholder chart data
   const generatePlaceholderData = (): { [key: string]: CategoryData } => {
@@ -245,6 +326,19 @@ export default function FacultyDashboardPage() {
     if (!authLoading) {
       fetchData();
     }
+
+    // Listen for visibility changes to refresh data when user returns to the dashboard
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && !authLoading) {
+        console.log("Dashboard became visible, refreshing data...");
+        fetchData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [authLoading]);
 
   useEffect(() => {
@@ -878,13 +972,34 @@ export default function FacultyDashboardPage() {
     <MainLayout>
       <div className="space-y-4">
         {/* Page Header - Matching faculty page styling */}
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
-              Faculty Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage your academic profile, publications, and contributions
-            </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+                Faculty Dashboard
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Manage your academic profile, publications, and contributions
+              </p>
+          </div>
+          <button
+            onClick={refreshData}
+            disabled={isRefreshing}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            title="Refresh dashboard data"
+          >
+            <svg
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0114.85-3.36M20.49 15a9 9 0 01-14.85 3.36"></path>
+            </svg>
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
 
           {/* First 5 Quick Stats Cards */}

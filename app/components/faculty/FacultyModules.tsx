@@ -522,7 +522,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               Speaker, auditor, judge roles in colleges
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/interactions`} className="w-full">
               <Button
                 variant="outline"
@@ -534,7 +534,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("interactions")}
                 disabled={generatingReport === "interactions"}
@@ -570,7 +569,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               Attended, resource person, organized, UGC panels
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/trainings`} className="w-full">
               <Button
                 variant="outline"
@@ -582,7 +581,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("trainings")}
                 disabled={generatingReport === "trainings"}
@@ -620,7 +618,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               Grants, sponsorships, and institutional support
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/financial-support`} className="w-full">
               <Button
                 variant="outline"
@@ -632,7 +630,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("financial-support")}
                 disabled={generatingReport === "financial-support"}
@@ -668,7 +665,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               Intellectual property filings and registrations
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/patents`} className="w-full">
               <Button
                 variant="outline"
@@ -680,7 +677,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("patents")}
                 disabled={generatingReport === "patents"}
