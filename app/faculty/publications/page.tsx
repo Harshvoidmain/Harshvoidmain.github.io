@@ -33,8 +33,6 @@ import {
   Link,
   Search,
   Loader2,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
@@ -101,7 +99,6 @@ export default function FacultyPublicationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [doiPreScreenOpen, setDoiPreScreenOpen] = useState(false);
-  const [expandedPublicationId, setExpandedPublicationId] = useState<number | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -112,7 +109,6 @@ export default function FacultyPublicationsPage() {
     useState<Publication | null>(null);
   const [preScreenDoi, setPreScreenDoi] = useState("");
   const [selectedCoAuthors, setSelectedCoAuthors] = useState<Faculty[]>([]);
-  const [isPublicationsDropdownOpen, setIsPublicationsDropdownOpen] = useState(false);
   const [formData, setFormData] = useState<PublicationFormData>({
     title: "",
     authors: "",
@@ -387,7 +383,6 @@ export default function FacultyPublicationsPage() {
       const payload = {
         id: selectedPublication.id, // Include the ID in the request body
         ...formData,
-        co_authors: selectedCoAuthors.map((ca) => ca.id),
         citation_count: formData.citation_count
           ? parseInt(formData.citation_count)
           : null,
@@ -500,18 +495,10 @@ export default function FacultyPublicationsPage() {
 
   const handleEdit = () => {
     if (selectedPublication) {
-      const toYMD = (ds: string) => {
-        const d = new Date(ds);
-        if (isNaN(d.getTime())) return ds;
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${y}-${m}-${day}`;
-      };
       setFormData({
         title: selectedPublication.title,
         authors: selectedPublication.authors,
-        publication_date: toYMD(selectedPublication.publication_date),
+        publication_date: selectedPublication.publication_date,
         publication_type: selectedPublication.publication_type,
         publication_venue: selectedPublication.publication_venue,
         doi: selectedPublication.doi || "",
@@ -704,8 +691,7 @@ export default function FacultyPublicationsPage() {
               )}
             </CardTitle>
           </CardHeader>
-          {isPublicationsDropdownOpen && (
-            <CardContent>
+          <CardContent>
             {loading ? (
               <p>Loading publications...</p>
             ) : error ? (
@@ -947,8 +933,7 @@ export default function FacultyPublicationsPage() {
 
               </div>
             )}
-            </CardContent>
-          )}
+          </CardContent>
         </Card>
       </div>
 
@@ -1144,7 +1129,153 @@ export default function FacultyPublicationsPage() {
         </div>
       </DialogForm>
 
-
+      {/* View Publication Dialog */}
+      <DialogForm
+        title="Publication Details"
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        onSubmit={(e) => {
+          e.preventDefault();
+          setViewDialogOpen(false);
+        }}
+        submitLabel="Close"
+        showCancel={false}
+      >
+        {selectedPublication && (
+          <div className="space-y-4">
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={handleEdit}
+              >
+                <Pencil size={14} />
+                Edit
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={handleDeleteClick}
+              >
+                <Trash size={14} />
+                Delete
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <p className="text-sm">{selectedPublication.title}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Authors</Label>
+              <p className="text-sm">{selectedPublication.authors}</p>
+            </div>
+            {selectedPublication.abstract && (
+              <div className="space-y-2">
+                <Label>Abstract</Label>
+                <p className="text-sm">{selectedPublication.abstract}</p>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Publication Date</Label>
+                <p className="text-sm">
+                  {formatDate(selectedPublication.publication_date)}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Publication Type</Label>
+                <div
+                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPublicationTypeColor(
+                    selectedPublication.publication_type
+                  )}`}
+                >
+                  {getPublicationTypeLabel(
+                    selectedPublication.publication_type
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Publication Venue</Label>
+              <p className="text-sm">{selectedPublication.publication_venue}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>DOI</Label>
+                {selectedPublication.doi ? (
+                  <a
+                    href={`https://doi.org/${selectedPublication.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                  >
+                    {selectedPublication.doi}
+                    <Link className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <p className="text-sm text-gray-500">Not provided</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>URL</Label>
+                {selectedPublication.url ? (
+                  <a
+                    href={selectedPublication.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                  >
+                    Visit Link
+                    <Link className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <p className="text-sm text-gray-500">Not provided</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Citation Count</Label>
+              <div className="space-y-2">
+                {renderCitationSources(selectedPublication).length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {renderCitationSources(selectedPublication).map(
+                      (source, index) => (
+                        <div
+                          key={index}
+                          className={`px-3 py-2 rounded-lg ${source.color}`}
+                        >
+                          <div className="font-medium text-sm">
+                            {source.name}
+                          </div>
+                          <div className="text-lg font-bold">
+                            {source.count}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No citation data available
+                  </p>
+                )}
+                {selectedPublication.citations_last_updated && (
+                  <p className="text-xs text-gray-400">
+                    Last updated:{" "}
+                    {new Date(
+                      selectedPublication.citations_last_updated
+                    ).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </DialogForm>
 
       {/* Edit Publication Dialog */}
       <DialogForm
@@ -1293,9 +1424,10 @@ export default function FacultyPublicationsPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hide this publication?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will hide the publication from your profile. The record remains in the system.
+              This action cannot be undone. This will permanently delete the
+              publication from your profile.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1304,7 +1436,7 @@ export default function FacultyPublicationsPage() {
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Hide
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

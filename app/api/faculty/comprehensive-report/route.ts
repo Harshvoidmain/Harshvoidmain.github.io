@@ -74,6 +74,46 @@ interface Contribution {
   details: string;
 }
 
+interface Interaction {
+  id: number;
+  event: string;
+  institution: string;
+  role: string;
+  date: string;
+  description?: string | null;
+}
+
+interface Training {
+  id: number;
+  title: string;
+  organization: string;
+  category: string;
+  start_date: string;
+  end_date?: string | null;
+  description?: string | null;
+}
+
+interface FinancialSupport {
+  id: number;
+  scheme_name: string;
+  sponsor: string;
+  amount: number;
+  date: string;
+  purpose?: string | null;
+  project_ref?: string | null;
+}
+
+interface Patent {
+  id: number;
+  title: string;
+  type: string;
+  application_no?: string | null;
+  status?: string | null;
+  filing_date: string;
+  assignee?: string | null;
+  description?: string | null;
+}
+
 interface NaacStatistics {
   criteria: string;
   score: number;
@@ -191,6 +231,38 @@ export async function GET(request: NextRequest) {
       console.error("Error fetching contributions:", error);
     }
     
+    // 10. Get faculty interactions
+    let interactions: Interaction[] = [];
+    try {
+      interactions = await getInteractions(facultyId);
+    } catch (error) {
+      console.error("Error fetching interactions:", error);
+    }
+    
+    // 11. Get faculty trainings
+    let trainings: Training[] = [];
+    try {
+      trainings = await getTrainings(facultyId);
+    } catch (error) {
+      console.error("Error fetching trainings:", error);
+    }
+    
+    // 12. Get financial support records
+    let financialSupport: FinancialSupport[] = [];
+    try {
+      financialSupport = await getFinancialSupport(facultyId);
+    } catch (error) {
+      console.error("Error fetching financial support:", error);
+    }
+    
+    // 13. Get patents and copyrights
+    let patents: Patent[] = [];
+    try {
+      patents = await getPatents(facultyId);
+    } catch (error) {
+      console.error("Error fetching patents:", error);
+    }
+    
     // 8. Get NAAC statistics
     let naacStats: NaacStatistics[] = [];
     try {
@@ -224,6 +296,10 @@ export async function GET(request: NextRequest) {
       awards,
       memberships,
       contributions,
+      interactions,
+      trainings,
+      financialSupport,
+      patents,
       naacStats,
       nbaStats
     );
@@ -254,6 +330,10 @@ export async function GET(request: NextRequest) {
           awards,
           memberships,
           contributions,
+          interactions,
+          trainings,
+          financialSupport,
+          patents,
           naacStats,
           nbaStats
         },
@@ -279,6 +359,10 @@ export async function GET(request: NextRequest) {
           awards: ["id", "title", "awarding_organization", "date"],
           memberships: ["id", "organization", "membership_type", "start_date"],
           contributions: ["id", "type", "title", "date", "details"],
+          interactions: ["id", "event", "institution", "role", "date", "description"],
+          trainings: ["id", "title", "organization", "category", "start_date", "end_date", "description"],
+          financialSupport: ["id", "scheme_name", "sponsor", "amount", "date", "purpose", "project_ref"],
+          patents: ["id", "title", "type", "application_no", "status", "filing_date", "assignee", "description"],
           naacStats: ["criteria", "score", "max_score", "year"],
           nbaStats: ["program", "status", "validity", "year"]
         },
@@ -643,6 +727,126 @@ async function getContributions(facultyId: string): Promise<any[]> {
   }
 }
 
+async function getInteractions(facultyId: string): Promise<Interaction[]> {
+  try {
+    const tableCheck = await query("SHOW TABLES LIKE 'faculty_interactions'");
+    if (Array.isArray(tableCheck) && tableCheck.length > 0) {
+      const rows = (await query(
+        `SELECT 
+          id,
+          event,
+          institution,
+          role,
+          date,
+          description
+        FROM 
+          faculty_interactions
+        WHERE 
+          faculty_id = ?
+        ORDER BY 
+          date DESC`,
+        [facultyId]
+      )) as RowDataPacket[];
+      return rows as Interaction[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching interactions:", error);
+    return [];
+  }
+}
+
+async function getTrainings(facultyId: string): Promise<Training[]> {
+  try {
+    const tableCheck = await query("SHOW TABLES LIKE 'faculty_trainings'");
+    if (Array.isArray(tableCheck) && tableCheck.length > 0) {
+      const rows = (await query(
+        `SELECT 
+          id,
+          title,
+          organization,
+          category,
+          start_date,
+          end_date,
+          description
+        FROM 
+          faculty_trainings
+        WHERE 
+          faculty_id = ?
+        ORDER BY 
+          start_date DESC`,
+        [facultyId]
+      )) as RowDataPacket[];
+      return rows as Training[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching trainings:", error);
+    return [];
+  }
+}
+
+async function getFinancialSupport(facultyId: string): Promise<FinancialSupport[]> {
+  try {
+    const tableCheck = await query("SHOW TABLES LIKE 'faculty_financial_support'");
+    if (Array.isArray(tableCheck) && tableCheck.length > 0) {
+      const rows = (await query(
+        `SELECT 
+          id,
+          scheme_name,
+          sponsor,
+          amount,
+          date,
+          purpose,
+          project_ref
+        FROM 
+          faculty_financial_support
+        WHERE 
+          faculty_id = ?
+        ORDER BY 
+          date DESC`,
+        [facultyId]
+      )) as RowDataPacket[];
+      return rows as FinancialSupport[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching financial support:", error);
+    return [];
+  }
+}
+
+async function getPatents(facultyId: string): Promise<Patent[]> {
+  try {
+    const tableCheck = await query("SHOW TABLES LIKE 'faculty_patents'");
+    if (Array.isArray(tableCheck) && tableCheck.length > 0) {
+      const rows = (await query(
+        `SELECT 
+          id,
+          title,
+          type,
+          application_no,
+          status,
+          filing_date,
+          assignee,
+          description
+        FROM 
+          faculty_patents
+        WHERE 
+          faculty_id = ?
+        ORDER BY 
+          filing_date DESC`,
+        [facultyId]
+      )) as RowDataPacket[];
+      return rows as Patent[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching patents:", error);
+    return [];
+  }
+}
+
 async function getNaacStatistics(facultyId: string): Promise<NaacStatistics[]> {
   try {
     // Try to get NAAC statistics from a dedicated table if it exists
@@ -812,6 +1016,10 @@ async function generateComprehensiveReport(
   awards: any[],
   memberships: any[],
   contributions: any[],
+  interactions: Interaction[],
+  trainings: Training[],
+  financialSupport: FinancialSupport[],
+  patents: Patent[],
   naacStats: NaacStatistics[],
   nbaStats: NbaStatistics[]
 ): Promise<[jsPDF, string]> {
@@ -924,6 +1132,10 @@ async function generateComprehensiveReport(
         ["Publications", publications.length.toString()],
         ["Research Projects", researchProjects.length.toString()],
         ["Workshops & Conferences", workshops.length.toString()],
+        ["Faculty Interactions", interactions.length.toString()],
+        ["FDP/STTP & Panels", trainings.length.toString()],
+        ["Financial Support", financialSupport.length.toString()],
+        ["Patents & Copyrights", patents.length.toString()],
         ["Professional Memberships", memberships.length.toString()],
         ["Awards & Recognitions", awards.length.toString()],
         ["Other Contributions", contributions.length.toString()],
@@ -931,6 +1143,10 @@ async function generateComprehensiveReport(
           publications.length +
           researchProjects.length +
           workshops.length +
+          interactions.length +
+          trainings.length +
+          financialSupport.length +
+          patents.length +
           memberships.length +
           awards.length +
           contributions.length
@@ -1207,6 +1423,182 @@ async function generateComprehensiveReport(
         doc.setFont("helvetica", "normal");
         doc.setTextColor(255, 0, 0);
         doc.text("Error displaying workshops and trainings", 14, yPos);
+        yPos += 10;
+      }
+    }
+
+    if (interactions.length > 0) {
+      try {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("Faculty Interactions", 14, yPos);
+        yPos += 8;
+        const rows = interactions.map((it, index) => [
+          index + 1,
+          it.event || "N/A",
+          it.institution || "N/A",
+          it.role || "N/A",
+          it.date ? new Date(it.date).toLocaleDateString("en-IN") : "N/A",
+        ]) as RowInput[];
+        autoTable(doc, {
+          head: [["#", "Event", "Institution", "Role", "Date"]],
+          body: rows,
+          startY: yPos,
+          theme: "grid",
+          headStyles: { fillColor: [75, 70, 229], textColor: 255 },
+          styles: { overflow: "linebreak", cellWidth: "auto" },
+          columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 40 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 25 },
+          },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      } catch (error) {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(255, 0, 0);
+        doc.text("Error displaying faculty interactions", 14, yPos);
+        yPos += 10;
+      }
+    }
+
+    if (trainings.length > 0) {
+      try {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("FDP/STTP & Panels", 14, yPos);
+        yPos += 8;
+        const rows = trainings.map((it, index) => [
+          index + 1,
+          it.title || "N/A",
+          it.organization || "N/A",
+          it.category || "N/A",
+          it.start_date ? new Date(it.start_date).toLocaleDateString("en-IN") : "N/A",
+          it.end_date ? new Date(it.end_date).toLocaleDateString("en-IN") : "N/A",
+        ]) as RowInput[];
+        autoTable(doc, {
+          head: [["#", "Title", "Organization", "Category", "Start Date", "End Date"]],
+          body: rows,
+          startY: yPos,
+          theme: "grid",
+          headStyles: { fillColor: [75, 70, 229], textColor: 255 },
+          styles: { overflow: "linebreak", cellWidth: "auto" },
+          columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 25 },
+          },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      } catch (error) {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(255, 0, 0);
+        doc.text("Error displaying FDP/STTP & panels", 14, yPos);
+        yPos += 10;
+      }
+    }
+
+    if (financialSupport.length > 0) {
+      try {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("Financial Support", 14, yPos);
+        yPos += 8;
+        const rows = financialSupport.map((it, index) => [
+          index + 1,
+          it.scheme_name || "N/A",
+          it.sponsor || "N/A",
+          it.amount?.toString() || "N/A",
+          it.date ? new Date(it.date).toLocaleDateString("en-IN") : "N/A",
+        ]) as RowInput[];
+        autoTable(doc, {
+          head: [["#", "Scheme", "Sponsor", "Amount", "Date"]],
+          body: rows,
+          startY: yPos,
+          theme: "grid",
+          headStyles: { fillColor: [75, 70, 229], textColor: 255 },
+          styles: { overflow: "linebreak", cellWidth: "auto" },
+          columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 40 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 25 },
+          },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      } catch (error) {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(255, 0, 0);
+        doc.text("Error displaying financial support", 14, yPos);
+        yPos += 10;
+      }
+    }
+
+    if (patents.length > 0) {
+      try {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("Patents & Copyrights", 14, yPos);
+        yPos += 8;
+        const rows = patents.map((it, index) => [
+          index + 1,
+          it.title || "N/A",
+          it.type || "N/A",
+          it.application_no || "N/A",
+          it.status || "N/A",
+          it.filing_date ? new Date(it.filing_date).toLocaleDateString("en-IN") : "N/A",
+        ]) as RowInput[];
+        autoTable(doc, {
+          head: [["#", "Title", "Type", "Application No.", "Status", "Filing Date"]],
+          body: rows,
+          startY: yPos,
+          theme: "grid",
+          headStyles: { fillColor: [75, 70, 229], textColor: 255 },
+          styles: { overflow: "linebreak", cellWidth: "auto" },
+          columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 35 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 25 },
+          },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      } catch (error) {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(255, 0, 0);
+        doc.text("Error displaying patents & copyrights", 14, yPos);
         yPos += 10;
       }
     }
