@@ -1,6 +1,7 @@
 // app/layout.tsx
 import { AuthProvider } from "./providers/auth-provider";
 import { ThemeProvider } from "./providers/theme-provider";
+import { FacultyDataProvider } from "./providers/faculty-data-provider";
 import "./globals.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
@@ -22,8 +23,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
+          <ThemeProvider>
+            <FacultyDataProvider>
+              {children}
+            </FacultyDataProvider>
           </ThemeProvider>
         </AuthProvider>
         <Toaster 

@@ -32,24 +32,26 @@ export async function GET(request: NextRequest) {
     let facultyId = null;
 
     if (authData.user.role === "faculty") {
-      // Get faculty ID for the logged-in user
-      const facultyResult = (await query(
-        "SELECT F_id FROM faculty WHERE F_id = ?",
+      const userResult: any[] = await query(
+        `SELECT faculty_id FROM users WHERE username = ?`,
         [username]
-      )) as RowDataPacket[];
+      );
 
-      if (
-        !facultyResult ||
-        !Array.isArray(facultyResult) ||
-        facultyResult.length === 0
-      ) {
+      if (!userResult || userResult.length === 0) {
         return NextResponse.json(
-          { success: false, message: "Faculty record not found" },
+          { success: false, message: "User record not found" },
           { status: 404 }
         );
       }
 
-      facultyId = facultyResult[0].F_id;
+      facultyId = userResult[0].faculty_id;
+
+      if (!facultyId) {
+        return NextResponse.json(
+          { success: false, message: "Faculty ID not linked to user" },
+          { status: 404 }
+        );
+      }
     }
 
     // For admin or HOD roles, allow querying for any faculty

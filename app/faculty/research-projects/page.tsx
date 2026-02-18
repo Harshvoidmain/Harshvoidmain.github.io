@@ -25,8 +25,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DialogForm } from "@/app/components/ui/dialog-form";
-import { Plus, Target, Trash, Pencil } from "lucide-react";
+import { Plus, Target, Trash, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
+import { getCurrentSession } from "@/app/faculty/dashboard/dashboard-utils";
 
 interface ResearchProject {
   id: number;
@@ -59,6 +61,7 @@ export default function FacultyResearchProjectsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(true);
   const [selectedProject, setSelectedProject] =
     useState<ResearchProject | null>(null);
   const [formData, setFormData] = useState<ProjectFormData>({
@@ -423,14 +426,45 @@ export default function FacultyResearchProjectsPage() {
           </Button>
         </div>
 
+        {/* Pie Chart Section */}
+        {!loading && !error && projects.length > 0 && (
+          <Card>
+            <CardContent className="pt-8">
+              <CategorySessionChart
+                data={projects}
+                type="research-project"
+                title="Research Projects by Status"
+                subtitle={`Distribution across all statuses and sessions`}
+                height={350}
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main content */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-green-600" />
-              Your Research Projects
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsProjectsDropdownOpen(!isProjectsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-green-600" />
+                Your Research Projects
+                <span className="text-sm font-normal text-gray-500">
+                  ({projects.length} projects)
+                </span>
+              </div>
+              {isProjectsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </CardTitle>
           </CardHeader>
+          {isProjectsDropdownOpen && (
           <CardContent>
             {loading ? (
               <p>Loading projects...</p>
@@ -490,6 +524,7 @@ export default function FacultyResearchProjectsPage() {
               </div>
             )}
           </CardContent>
+          )}
         </Card>
       </div>
 

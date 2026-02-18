@@ -19,9 +19,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DialogForm } from "@/app/components/ui/dialog-form";
-import { Plus, Globe, Trash, Pencil, AlertTriangle } from "lucide-react";
+import { Plus, Globe, Trash, Pencil, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { DocumentVerification } from "@/app/components/DocumentVerification";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
 
 interface Membership {
   SrNo: number; // This is actually membership_id
@@ -59,6 +60,7 @@ export default function FacultyMembershipsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMembershipsDropdownOpen, setIsMembershipsDropdownOpen] = useState(true);
   const [selectedMembership, setSelectedMembership] =
     useState<Membership | null>(null);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1); // Step 1: Form, Step 2: Verification
@@ -497,58 +499,90 @@ export default function FacultyMembershipsPage() {
         </div>
 
         {/* Main content */}
+        {memberships.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Memberships Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CategorySessionChart
+                data={memberships}
+                type="membership"
+                title="Memberships by Type"
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-red-600" />
-              Your Memberships
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsMembershipsDropdownOpen(!isMembershipsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-pink-600" />
+                Your Memberships
+                <span className="text-sm font-normal text-gray-500">
+                  ({memberships.length} memberships)
+                </span>
+              </div>
+              {isMembershipsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p>Loading memberships...</p>
-            ) : error ? (
-              <div className="bg-red-50 text-red-500 p-4 rounded">
-                <p>{error}</p>
-              </div>
-            ) : memberships.length === 0 ? (
-              <p className="text-gray-500">
-                No professional memberships found. Use the "Add Membership"
-                button to create one.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {memberships.map((membership) => (
-                  <div
-                    key={membership.SrNo}
-                    className="p-4 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex justify-between">
-                      <h3 className="font-medium">{membership.organization}</h3>
-                      <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                        {membership.Membership_Type}
-                      </span>
+          {isMembershipsDropdownOpen && (
+            <CardContent>
+              {loading ? (
+                <p>Loading memberships...</p>
+              ) : error ? (
+                <div className="bg-red-50 text-red-500 p-4 rounded">
+                  <p>{error}</p>
+                </div>
+              ) : memberships.length === 0 ? (
+                <p className="text-gray-500">
+                  No professional memberships found. Use the "Add Membership"
+                  button to create one.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {memberships.map((membership) => (
+                    <div
+                      key={membership.SrNo}
+                      className="p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex justify-between">
+                        <h3 className="font-medium">{membership.organization}</h3>
+                        <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
+                          {membership.Membership_Type}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mt-3">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(membership.Start_Date)} -{" "}
+                          {membership.End_Date
+                            ? formatDate(membership.End_Date)
+                            : "Present"}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(membership)}
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex justify-between mt-3">
-                      <span className="text-xs text-gray-500">
-                        {formatDate(membership.Start_Date)} -{" "}
-                        {membership.End_Date
-                          ? formatDate(membership.End_Date)
-                          : "Present"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(membership)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
 

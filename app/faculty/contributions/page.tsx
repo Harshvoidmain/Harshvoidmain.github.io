@@ -26,21 +26,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DialogForm } from "@/app/components/ui/dialog-form";
-import { Plus, Trash, Pencil, Folder, FileText, BookOpen } from "lucide-react";
+import { Plus, FileText, Trash, Pencil, Search, Loader2, ChevronDown, ChevronUp, Folder, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
 
 interface Contribution {
   Contribution_ID: number;
-  F_ID: number;
+  F_ID: bigint;
   Contribution_Type: string;
   Description: string;
   Contribution_Date: string;
+  Recognized_By: string | null;
+  Award_Received: string | null;
+  Remarks: string | null;
 }
 
 interface ContributionFormData {
   Contribution_Type: string;
   Description: string;
   Contribution_Date: string;
+  Recognized_By?: string;
+  Award_Received?: string;
+  Remarks?: string;
 }
 
 export default function FacultyContributionsPage() {
@@ -52,6 +59,7 @@ export default function FacultyContributionsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isContributionsDropdownOpen, setIsContributionsDropdownOpen] = useState(true);
   const [selectedContribution, setSelectedContribution] =
     useState<Contribution | null>(null);
   const [formData, setFormData] = useState<ContributionFormData>({
@@ -336,58 +344,93 @@ export default function FacultyContributionsPage() {
           </Button>
         </div>
 
-        {/* Main content */}
+        {/* Pie Chart Section */}
+        {!loading && !error && contributions.length > 0 && (
+          <Card>
+            <CardContent className="pt-8">
+              <CategorySessionChart
+                data={contributions}
+                type="contribution"
+                title="Contributions by Category"
+                subtitle={`Distribution across all contribution types and sessions`}
+                height={350}
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Contributions Dropdown Section */}
         <Card>
-          <CardHeader>
-            <CardTitle>Your Contributions</CardTitle>
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsContributionsDropdownOpen(!isContributionsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-red-600" />
+                Your Contributions
+                <span className="text-sm font-normal text-gray-500">
+                  ({contributions.length} contributions)
+                </span>
+              </div>
+              {isContributionsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p>Loading contributions...</p>
-            ) : error ? (
-              <div className="bg-red-50 text-red-500 p-4 rounded">
-                <p>{error}</p>
-              </div>
-            ) : contributions.length === 0 ? (
-              <p className="text-gray-500">
-                No contributions found. Use the "Add Contribution" button to
-                create one.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {contributions.map((contribution) => (
-                  <div
-                    key={contribution.Contribution_ID}
-                    className="p-4 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      {getContributionIcon(contribution.Contribution_Type)}
-                      <h3 className="font-medium">
-                        {contribution.Contribution_Type}
-                      </h3>
+          {isContributionsDropdownOpen && (
+            <CardContent>
+              {loading ? (
+                <p>Loading contributions...</p>
+              ) : error ? (
+                <div className="bg-red-50 text-red-500 p-4 rounded">
+                  <p>{error}</p>
+                </div>
+              ) : contributions.length === 0 ? (
+                <p className="text-gray-500">
+                  No contributions found. Use the "Add Contribution" button to
+                  create one.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {contributions.map((contribution) => (
+                    <div
+                      key={contribution.Contribution_ID}
+                      className="p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex items-center gap-2">
+                        {getContributionIcon(contribution.Contribution_Type)}
+                        <h3 className="font-medium">
+                          {contribution.Contribution_Type}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {contribution.Description.length > 200
+                          ? `${contribution.Description.substring(0, 200)}...`
+                          : contribution.Description}
+                      </p>
+                      <div className="flex justify-between mt-2">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(contribution.Contribution_Date)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(contribution)}
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {contribution.Description.length > 200
-                        ? `${contribution.Description.substring(0, 200)}...`
-                        : contribution.Description}
-                    </p>
-                    <div className="flex justify-between mt-2">
-                      <span className="text-xs text-gray-500">
-                        {formatDate(contribution.Contribution_Date)}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(contribution)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
 

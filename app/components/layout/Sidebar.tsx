@@ -46,7 +46,7 @@ const getSidebarItems = (userRole: string | undefined): SidebarItem[] => {
     return [
       { title: "Dashboard", href: "/faculty/dashboard", icon: HomeIcon },
       { title: "Faculty", href: "/faculty", icon: UsersIcon },
-      { title: "Reports Generation", href: "/faculty/reports", icon: DocumentTextIcon },
+      { title: "Reports Generation", href: "/reports/generation", icon: DocumentTextIcon },
     ];
   }
 
@@ -80,7 +80,7 @@ export default function Sidebar() {
   const renderSidebarItem = (item: SidebarItem, level = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.includes(item.href);
-    const isActive = pathname.startsWith(item.href);
+    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
 
     if (hasChildren) {
       return (
@@ -121,7 +121,7 @@ export default function Sidebar() {
         variant="ghost"
         className={cn(
           "flex h-10 w-full items-center justify-start gap-2 rounded-md px-3 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100",
-          pathname.startsWith(item.href) &&
+          pathname === item.href &&
             "bg-gray-100 font-semibold text-gray-900",
           level > 0 && "ml-4"
         )}

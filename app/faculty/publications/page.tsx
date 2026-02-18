@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import MainLayout from "@/app/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +38,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
-import PublicationCategoryChart from "@/app/components/faculty/PublicationCategoryChart";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
+import { getCurrentSession } from "@/app/faculty/dashboard/dashboard-utils";
 interface Publication {
   id: number;
   faculty_id: string;
@@ -665,31 +666,21 @@ export default function FacultyPublicationsPage() {
         </div>
 
         {/* Main content */}
-        {/* Pie Charts Section */}
+        {/* Pie Chart Section */}
         {!loading && !error && publications.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardContent className="pt-6">
-                <PublicationCategoryChart
-                  publications={publications}
-                  title="All Publications by Category"
-                  subtitle="Total distribution across all publication types"
-                  height={300}
-                />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <PublicationCategoryChart
-                  publications={publications}
-                  title="Current Year Publications"
-                  subtitle={`Publications from ${new Date().getFullYear()}`}
-                  height={300}
-                  filterByYear={new Date().getFullYear()}
-                />
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardContent className="pt-8">
+              <CategorySessionChart
+                data={publications}
+                type="publication"
+                title="Publications by Category"
+                subtitle={`Distribution across all publication types and sessions`}
+                height={350}
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
         )}
 
         {/* Publications Dropdown Section */}
@@ -756,9 +747,8 @@ export default function FacultyPublicationsPage() {
                               : "-";
                           const isExpanded = expandedPublicationId === p.id;
                           return (
-                            <>
+                            <React.Fragment key={`pub-${p.id}`}>
                               <tr
-                                key={`row-${p.id}`}
                                 className={`border-t cursor-pointer hover:bg-gray-50 ${
                                   isExpanded ? "bg-gray-50" : ""
                                 }`}
@@ -948,7 +938,7 @@ export default function FacultyPublicationsPage() {
                                   </td>
                                 </tr>
                               )}
-                            </>
+                            </React.Fragment>
                           );
                         })}
                     </tbody>

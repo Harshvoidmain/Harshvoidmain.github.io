@@ -5,13 +5,49 @@ import path from "path";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const facultyId = searchParams.get("facultyId");
+    // Get user info from auth system
+    const authResponse = await fetch(`${request.nextUrl.origin}/api/auth/me`, {
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    });
+
+    if (!authResponse.ok) {
+      return NextResponse.json(
+        { success: false, message: "Authentication failed" },
+        { status: 401 }
+      );
+    }
+
+    const authData = await authResponse.json();
+
+    if (!authData.success || !authData.user) {
+      return NextResponse.json(
+        { success: false, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    // Get faculty ID from username
+    const user = authData.user;
+    const userResult: any[] = await query(
+      `SELECT faculty_id FROM users WHERE username = ?`,
+      [user.username]
+    );
+
+    if (!userResult || userResult.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "User record not found" },
+        { status: 404 }
+      );
+    }
+
+    const facultyId = userResult[0].faculty_id;
 
     if (!facultyId) {
       return NextResponse.json(
-        { success: false, message: "Faculty ID is required" },
-        { status: 400 }
+        { success: false, message: "Faculty ID not linked to user" },
+        { status: 404 }
       );
     }
 

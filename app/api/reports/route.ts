@@ -26,6 +26,28 @@ declare module "jspdf" {
   }
 }
 
+// Helper function to generate filename in format: PREFIX-FACULTYID-YYYYMMDD-HHMMSS.pdf
+const generateReportFilename = (
+  prefix: string,
+  facultyId?: string | null
+): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  // If facultyId is provided, use the new format
+  if (facultyId) {
+    return `${prefix}-${facultyId}-${year}${month}${day}-${hours}${minutes}${seconds}.pdf`;
+  }
+
+  // For department reports, use the old format
+  return `${prefix}_report_${year}${month}${day}-${hours}${minutes}${seconds}.pdf`;
+};
+
 // Helper function to get faculty details for signature
 const getFacultyForSignature = async (
   departmentName?: string,
@@ -1735,11 +1757,7 @@ async function generatePublicationsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `publications_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FP", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(
@@ -1815,11 +1833,7 @@ async function generateResearchProjectsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `research_projects_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FRP", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(
@@ -1895,11 +1909,7 @@ async function generateContributionsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `contributions_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FC", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(
@@ -1975,11 +1985,7 @@ async function generateWorkshopsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `workshops_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FW", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(
@@ -2052,11 +2058,7 @@ async function generateMembershipsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `memberships_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FM", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(
@@ -2132,11 +2134,7 @@ async function generateAwardsReport(
     contextName = facultyInfo.facultyName;
   }
 
-  const filename = `awards_report_${
-    facultyId
-      ? facultyInfo?.facultyName.replace(/\s+/g, "_")
-      : departmentId || "all"
-  }_${new Date().toISOString().split("T")[0]}.pdf`;
+  const filename = generateReportFilename("FA", facultyId);
 
   // Add institutional letterhead
   const contentStartY = await addInstitutionalLetterhead(

@@ -19,10 +19,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DialogForm } from "@/app/components/ui/dialog-form";
-import { Plus, Award, Trash, Pencil, AlertTriangle } from "lucide-react";
+import { Plus, Award, Trash, Pencil, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers/auth-provider";
 import DocumentVerification from "@/app/components/DocumentVerification";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
 
 interface FacultyAward {
   award_id: number;
@@ -53,6 +54,7 @@ export default function FacultyAwardsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAwardsDropdownOpen, setIsAwardsDropdownOpen] = useState(true);
   const [selectedAward, setSelectedAward] = useState<FacultyAward | null>(null);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1); // Step 1: Form, Step 2: Verification
   const [formData, setFormData] = useState<AwardFormData>({
@@ -117,7 +119,7 @@ export default function FacultyAwardsPage() {
         throw new Error("User not authenticated. Please log in again.");
       }
       const response = await fetch(
-        `/api/faculty/awards?facultyId=${user.username}`
+        `/api/faculty/awards`
       );
 
       if (!response.ok) {
@@ -386,78 +388,110 @@ export default function FacultyAwardsPage() {
         </div>
 
         {/* Main content */}
+        {awards.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Awards Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CategorySessionChart
+                data={awards}
+                type="award"
+                title="Awards by Category"
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-sky-600" />
-              Your Awards
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsAwardsDropdownOpen(!isAwardsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-orange-600" />
+                Your Awards
+                <span className="text-sm font-normal text-gray-500">
+                  ({awards.length} awards)
+                </span>
+              </div>
+              {isAwardsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {awardsLoading ? (
-              <p>Loading awards...</p>
-            ) : error ? (
-              <div className="bg-red-50 text-red-500 p-4 rounded">
-                <p>{error}</p>
-              </div>
-            ) : awards.length === 0 ? (
-              <p className="text-gray-500">
-                No awards found. Use the "Add Award" button to create one.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {awards.map((award) => {
-                  /* console.log(
-    award.category,
-    awards.length,
-    award.award_name,
-    award.award_id,
-    award.date,
-    award.award_description,
-    award.faculty_id,
-    award.organization
-  );*/
+          {isAwardsDropdownOpen && (
+            <CardContent>
+              {awardsLoading ? (
+                <p>Loading awards...</p>
+              ) : error ? (
+                <div className="bg-red-50 text-red-500 p-4 rounded">
+                  <p>{error}</p>
+                </div>
+              ) : awards.length === 0 ? (
+                <p className="text-gray-500">
+                  No awards found. Use the "Add Award" button to create one.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {awards.map((award) => {
+                    /* console.log(
+      award.category,
+      awards.length,
+      award.award_name,
+      award.award_id,
+      award.date,
+      award.award_description,
+      award.faculty_id,
+      award.organization
+    );*/
 
-                  return (
-                    <div
-                      key={award.award_id}
-                      className="p-4 border rounded-lg hover:bg-gray-50"
-                    >
-                      <div className="flex justify-between">
-                        <h3 className="font-medium">{award.award_name}</h3>
-                        {award.category && (
-                          <span className="text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                            {award.category}
+                    return (
+                      <div
+                        key={award.award_id}
+                        className="p-4 border rounded-lg hover:bg-gray-50"
+                      >
+                        <div className="flex justify-between">
+                          <h3 className="font-medium">{award.award_name}</h3>
+                          {award.category && (
+                            <span className="text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                              {award.category}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 mt-1">
+                          {award.organization}
+                        </p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {award.award_description &&
+                          award.award_description.length > 150
+                            ? `${award.award_description.substring(0, 150)}...`
+                            : award.award_description}
+                        </p>
+                        <div className="flex justify-between mt-3">
+                          <span className="text-xs text-gray-500">
+                            {formatDate(award.date)}
                           </span>
-                        )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(award)}
+                          >
+                            View Details
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-sm font-medium text-gray-600 mt-1">
-                        {award.organization}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {award.award_description &&
-                        award.award_description.length > 150
-                          ? `${award.award_description.substring(0, 150)}...`
-                          : award.award_description}
-                      </p>
-                      <div className="flex justify-between mt-3">
-                        <span className="text-xs text-gray-500">
-                          {formatDate(award.date)}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewDetails(award)}
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
 
