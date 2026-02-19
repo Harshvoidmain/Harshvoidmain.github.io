@@ -552,7 +552,7 @@ export default function DashboardPage() {
             bgColor="bg-gradient-to-br from-indigo-50 to-white"
           />
           <StatsCard
-            title="Total student"
+            title="Total students"
             value={formatNumber(totalStudents)}
             icon={<AcademicCapIcon className="h-6 w-6 text-purple-600" />}
             trend="up"

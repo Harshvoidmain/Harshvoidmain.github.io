@@ -41,6 +41,10 @@ interface FacultyInfo {
   research_projects?: number;
   workshops_attended?: number;
   awards?: number;
+  interactions?: number;
+  trainings?: number;
+  financial_supports?: number;
+  patents?: number;
 }
 
 interface FacultyModulesProps {
@@ -319,12 +323,12 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{facultyInfo.publications}</p>
+            <p className="text-3xl font-bold text-blue-600">{facultyInfo.publications}</p>
             <p className="text-sm text-gray-500 mt-1">
               Research papers and articles published
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/publications`} className="w-full">
               <Button
                 variant="outline"
@@ -336,7 +340,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("publications")}
                 disabled={generatingReport === "publications"}
@@ -367,14 +370,14 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
+            <p className="text-3xl font-bold text-green-600">
               {facultyInfo.research_projects}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Ongoing and completed research projects
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/research-projects`} className="w-full">
               <Button
                 variant="outline"
@@ -386,7 +389,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("research-projects")}
                 disabled={generatingReport === "research-projects"}
@@ -417,14 +419,14 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
+            <p className="text-3xl font-bold text-purple-600">
               {facultyInfo.total_contributions}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Academic contributions across categories
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/contributions`} className="w-full">
               <Button
                 variant="outline"
@@ -436,7 +438,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("contributions")}
                 disabled={generatingReport === "contributions"}
@@ -467,14 +468,14 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
+            <p className="text-3xl font-bold text-amber-600">
               {facultyInfo.workshops_attended}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Events attended or organized
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/workshops`} className="w-full">
               <Button
                 variant="outline"
@@ -486,12 +487,201 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("workshops")}
                 disabled={generatingReport === "workshops"}
               >
                 {generatingReport === "workshops" ? (
+                  <>
+                    Generating...
+                    <Download className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Generate Report
+                    <Download className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+        {/* Faculty Interactions */}
+        <Card className="overflow-hidden hover:shadow-md transition-shadow">
+          <div className="h-1" style={{ backgroundColor: "#065f46" }} />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-emerald-700" />
+              Faculty Interactions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{facultyInfo.interactions ?? 0}</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Speaker, auditor, judge roles in colleges
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 pt-6">
+            <Link href={`/faculty/interactions`} className="w-full">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center"
+              >
+                Manage Interactions
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {canGenerateReports() && (
+              <Button
+                className="w-full flex justify-between items-center"
+                onClick={() => generateModuleReport("interactions")}
+                disabled={generatingReport === "interactions"}
+              >
+                {generatingReport === "interactions" ? (
+                  <>
+                    Generating...
+                    <Download className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Generate Report
+                    <Download className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+        {/* FDP/STTP & Panels */}
+        <Card className="overflow-hidden hover:shadow-md transition-shadow">
+          <div className="h-1" style={{ backgroundColor: "#1f2937" }} />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-gray-800" />
+              FDP/STTP & Panels
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{facultyInfo.trainings ?? 0}</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Attended, resource person, organized, UGC panels
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 pt-6">
+            <Link href={`/faculty/trainings`} className="w-full">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center"
+              >
+                Manage Training & Panels
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {canGenerateReports() && (
+              <Button
+                className="w-full flex justify-between items-center"
+                onClick={() => generateModuleReport("trainings")}
+                disabled={generatingReport === "trainings"}
+              >
+                {generatingReport === "trainings" ? (
+                  <>
+                    Generating...
+                    <Download className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Generate Report
+                    <Download className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+        {/* Financial Support */}
+        <Card className="overflow-hidden hover:shadow-md transition-shadow">
+          <div className="h-1" style={{ backgroundColor: "#7c2d12" }} />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-orange-900" />
+              Financial Support
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {facultyInfo.financial_supports ?? 0}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Grants, sponsorships, and institutional support
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 pt-6">
+            <Link href={`/faculty/financial-support`} className="w-full">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center"
+              >
+                Manage Financial Support
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {canGenerateReports() && (
+              <Button
+                className="w-full flex justify-between items-center"
+                onClick={() => generateModuleReport("financial-support")}
+                disabled={generatingReport === "financial-support"}
+              >
+                {generatingReport === "financial-support" ? (
+                  <>
+                    Generating...
+                    <Download className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Generate Report
+                    <Download className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+        {/* Patents & Copyrights */}
+        <Card className="overflow-hidden hover:shadow-md transition-shadow">
+          <div className="h-1" style={{ backgroundColor: "#4b5563" }} />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <BookMarked className="h-5 w-5 text-gray-700" />
+              Patents & Copyrights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{facultyInfo.patents ?? 0}</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Intellectual property filings and registrations
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 pt-6">
+            <Link href={`/faculty/patents`} className="w-full">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center"
+              >
+                Manage IP Records
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {canGenerateReports() && (
+              <Button
+                className="w-full flex justify-between items-center"
+                onClick={() => generateModuleReport("patents")}
+                disabled={generatingReport === "patents"}
+              >
+                {generatingReport === "patents" ? (
                   <>
                     Generating...
                     <Download className="h-4 w-4 animate-spin" />
@@ -517,14 +707,14 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
+            <p className="text-3xl font-bold text-red-600">
               {facultyInfo.professional_memberships}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Organizations and society memberships
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/memberships`} className="w-full">
               <Button
                 variant="outline"
@@ -536,7 +726,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("memberships")}
                 disabled={generatingReport === "memberships"}
@@ -567,12 +756,12 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{facultyInfo.awards}</p>
+            <p className="text-3xl font-bold text-sky-600">{facultyInfo.awards}</p>
             <p className="text-sm text-gray-500 mt-1">
               Honors and recognitions received
             </p>
           </CardContent>
-          <CardFooter className={canGenerateReports() ? "space-y-2" : ""}>
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Link href={`/faculty/awards`} className="w-full">
               <Button
                 variant="outline"
@@ -584,7 +773,6 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                variant="default"
                 className="w-full flex justify-between items-center"
                 onClick={() => generateModuleReport("awards")}
                 disabled={generatingReport === "awards"}

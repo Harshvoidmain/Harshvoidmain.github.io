@@ -26,6 +26,7 @@ export interface User {
   role: UserRole;
   department?: string;
   departmentId?: number;
+  facultyId?: number;
   permissions: string[];
   name?: string;
 }
@@ -69,7 +70,17 @@ const publicRoutes = [
 const roleAccess: Record<string, UserRole[]> = {
   "/dashboard": ["admin", "hod", "faculty", "staff", "student" , "department"],
   "/dashboard/publications": ["admin", "hod", "faculty", "staff", "student", "department"], // TEMPORARY FOR TESTING - Allow all roles
+  "/reports/generation": ["admin", "hod", "faculty", "staff", "student", "department"],
   "/reports/publications": ["admin", "hod", "faculty", "staff", "student", "department"], // TEMPORARY FOR TESTING - Allow all roles
+  "/reports/research-projects": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/contributions": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/workshops": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/memberships": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/awards": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/fdp": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/financial": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/patents": ["admin", "hod", "faculty", "staff", "student", "department"],
+  "/reports/interaction": ["admin", "hod", "faculty", "staff", "student", "department"],
   "/faculty": ["admin", "hod", "faculty", "staff", "student" , "department" ],
   "/faculty/add": ["admin", "hod", "faculty" , "department"],
   "/faculty/edit": ["admin", "hod", "faculty" , "department"],

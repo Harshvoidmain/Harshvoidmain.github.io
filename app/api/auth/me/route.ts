@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       try {
         // Get admin user in development mode
         const debugUsers = await query(
-          `SELECT id, username, email, role, name, department_id
+          `SELECT id, username, email, role, name, department_id, faculty_id
            FROM users 
            WHERE role = 'admin' 
            LIMIT 1`
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
       const users = await query(
         `
         SELECT 
-          u.id, u.username, u.email, u.role, u.name, u.department_id
+          u.id, u.username, u.email, u.role, u.name, u.department_id, u.faculty_id
         FROM users u
         WHERE u.id = ? AND u.is_active = 1
         LIMIT 1
@@ -220,11 +220,12 @@ export async function GET(request: NextRequest) {
             name: user.name,
             department,
             departmentId: user.department_id,
+            facultyId: user.faculty_id,
             permissions: permissionNames,
           },
         }),
         { status: 200, headers }
-      ); // Generate a fresh token to extend the session
+      );
       const newToken = require("jsonwebtoken").sign(
         { userId: user.id, role: user.role },
         JWT_SECRET,

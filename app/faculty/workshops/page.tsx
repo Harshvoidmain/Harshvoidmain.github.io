@@ -25,8 +25,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DialogForm } from "@/app/components/ui/dialog-form";
-import { Plus, CalendarDays, Trash, Pencil, MapPin } from "lucide-react";
+import { Plus, CalendarDays, Trash, Pencil, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
+import CategorySessionChart from "@/app/components/faculty/CategorySessionChart";
 
 interface Workshop {
   id: number;
@@ -59,6 +60,7 @@ export default function FacultyWorkshopsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isWorkshopsDropdownOpen, setIsWorkshopsDropdownOpen] = useState(true);
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(
     null
   );
@@ -377,75 +379,107 @@ const handleDelete = async () => {
         </div>
 
         {/* Main content */}
+        {workshops.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Workshops Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CategorySessionChart
+                data={workshops}
+                type="workshop"
+                title="Workshops by Type"
+                showSessionComparison={true}
+                isDetailPage={true}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-blue-600" />
-              Your Workshops & Conferences
+          <CardHeader
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsWorkshopsDropdownOpen(!isWorkshopsDropdownOpen)}
+          >
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-green-600" />
+                Your Workshops & Conferences
+                <span className="text-sm font-normal text-gray-500">
+                  ({workshops.length} events)
+                </span>
+              </div>
+              {isWorkshopsDropdownOpen ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p>Loading events...</p>
-            ) : error ? (
-              <div className="bg-red-50 text-red-500 p-4 rounded">
-                <p>{error}</p>
-              </div>
-            ) : workshops.length === 0 ? (
-              <p className="text-gray-500">
-                No workshops or conferences found. Use the "Add Event" button to
-                create one.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {workshops.map((workshop) => (
-                  <div
-                    key={workshop.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex flex-col sm:flex-row justify-between gap-2">
-                      <h3 className="font-medium">{workshop.title}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getTypeColor(
-                            workshop.type
-                          )}`}
-                        >
-                          {getTypeLabel(workshop.type)}
+          {isWorkshopsDropdownOpen && (
+            <CardContent>
+              {loading ? (
+                <p>Loading events...</p>
+              ) : error ? (
+                <div className="bg-red-50 text-red-500 p-4 rounded">
+                  <p>{error}</p>
+                </div>
+              ) : workshops.length === 0 ? (
+                <p className="text-gray-500">
+                  No workshops or conferences found. Use the "Add Event" button to
+                  create one.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {workshops.map((workshop) => (
+                    <div
+                      key={workshop.id}
+                      className="p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex flex-col sm:flex-row justify-between gap-2">
+                        <h3 className="font-medium">{workshop.title}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${getTypeColor(
+                              workshop.type
+                            )}`}
+                          >
+                            {getTypeLabel(workshop.type)}
+                          </span>
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${getRoleColor(
+                              workshop.role
+                            )}`}
+                          >
+                            {getRoleLabel(workshop.role)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center mt-2 text-sm text-gray-600">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {workshop.venue}
+                      </div>
+                      <div className="flex justify-between mt-3">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(workshop.start_date)} -{" "}
+                          {workshop.end_date
+                            ? formatDate(workshop.end_date)
+                            : "Present"}
                         </span>
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getRoleColor(
-                            workshop.role
-                          )}`}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(workshop)}
                         >
-                          {getRoleLabel(workshop.role)}
-                        </span>
+                          View Details
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center mt-2 text-sm text-gray-600">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {workshop.venue}
-                    </div>
-                    <div className="flex justify-between mt-3">
-                      <span className="text-xs text-gray-500">
-                        {formatDate(workshop.start_date)} -{" "}
-                        {workshop.end_date
-                          ? formatDate(workshop.end_date)
-                          : "Present"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(workshop)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
 
