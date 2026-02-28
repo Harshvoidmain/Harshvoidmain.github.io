@@ -1,7 +1,6 @@
 import mysql from "mysql2/promise";
 
-// Create a connection pool
-const pool = mysql.createPool({
+const poolConfig = {
   host: process.env.MYSQL_HOST || "localhost",
   port: parseInt(process.env.MYSQL_PORT || "3306"),
   user: process.env.MYSQL_USER || "root",
@@ -10,7 +9,15 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-});
+};
+
+// Create a connection pool and cache it globally for Next.js hot reloads
+const globalForDb = globalThis as unknown as { mysqlPool: mysql.Pool };
+const pool = globalForDb.mysqlPool || mysql.createPool(poolConfig);
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.mysqlPool = pool;
+}
 
 // Export a function to get a connection from the pool
 export async function getConnection() {

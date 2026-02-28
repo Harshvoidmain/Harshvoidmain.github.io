@@ -531,11 +531,22 @@ export default function FacultyDashboardPage() {
               return (
                 <div className={`${glassCardClasses} p-6 flex flex-col relative group overflow-hidden`}>
                   {glossyEdge}
-                  <div className="flex justify-between items-center mb-0">
-                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Publications Overview</p>
-                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      {ICONS["publications"]}
+                  <div className="flex justify-between items-center mb-0 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        {ICONS["publications"]}
+                      </div>
+                      <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Publications Overview</p>
                     </div>
+                    <button
+                      onClick={() => setExpandedId("publications")}
+                      className="h-8 w-8 flex items-center justify-center rounded-xl bg-gray-100/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-700 text-gray-400 hover:text-indigo-500 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                      title="Expand Details"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </button>
                   </div>
 
                   <div className="flex-1 w-full flex flex-col justify-end mt-2 min-h-[290px]">

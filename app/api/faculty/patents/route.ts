@@ -4,26 +4,19 @@
  
 export async function GET(request: NextRequest) {
   try {
-     const authResponse = await fetch(`${request.nextUrl.origin}/api/auth/me`, {
-       headers: {
-         cookie: request.headers.get("cookie") || "",
-       },
-     });
- 
-     if (!authResponse.ok) {
-       return NextResponse.json(
-         { success: false, message: "Authentication failed" },
-         { status: 401 }
-       );
-     }
- 
-     const authData = await authResponse.json();
-     if (!authData.success || !authData.user) {
-       return NextResponse.json(
-         { success: false, message: "User not authenticated" },
-         { status: 401 }
-       );
-     }
+     // Get user using our robust server-side auth utility
+    const { getAuthUser } = await import("@/app/lib/auth-server");
+    const user = await getAuthUser(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+    
+    // Polyfill authData to avoid breaking existing downstream code
+    const authData = { success: true, user };
  
      const facultyId =
        request.nextUrl.searchParams.get("facultyId") || authData.user.username;
@@ -72,24 +65,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authResponse = await fetch(`${request.nextUrl.origin}/api/auth/me`, {
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    });
-    if (!authResponse.ok) {
-      return NextResponse.json(
-        { success: false, message: "Authentication failed" },
-        { status: 401 }
-      );
-    }
-    const authData = await authResponse.json();
-    if (!authData.success || !authData.user) {
+    // Get user using our robust server-side auth utility
+    const { getAuthUser } = await import("@/app/lib/auth-server");
+    const user = await getAuthUser(request);
+
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
         { status: 401 }
       );
     }
+    
+    // Polyfill authData to avoid breaking existing downstream code
+    const authData = { success: true, user };
     const facultyId =
       request.nextUrl.searchParams.get("facultyId") || authData.user.username;
     if (!facultyId) {

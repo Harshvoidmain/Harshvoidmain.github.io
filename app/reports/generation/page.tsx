@@ -3,13 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Download, Loader2 } from "lucide-react";
 import {
   BookOpen,
@@ -23,6 +16,10 @@ import {
   Cpu,
   MessageCircle,
 } from "lucide-react";
+
+// Core styling classes for the "Liquid Glass" Grapho Aesthetic
+const glassCardClasses = "bg-white/40 backdrop-blur-3xl dark:bg-[#0A0A0A]/40 dark:backdrop-blur-3xl rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.16)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.24)] hover:bg-white/50 dark:hover:bg-[#0A0A0A]/50 sm:p-6 p-4";
+const glossyEdge = <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />;
 
 const FACULTY_MODULES = [
   {
@@ -175,10 +172,10 @@ export default function ReportsGenerationPage() {
       <div className="max-w-7xl">
         {/* Header - Left Aligned */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
             Reports Generation
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-[13px] font-medium text-gray-400 dark:text-gray-500 max-w-2xl mt-2">
             Generate comprehensive reports for each faculty module
           </p>
         </div>
@@ -190,33 +187,35 @@ export default function ReportsGenerationPage() {
             const isLoading = loadingModule === module.id;
 
             return (
-              <Card
+              <div
                 key={module.id}
-                className="overflow-hidden hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-800"
+                className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}
               >
+                {glossyEdge}
                 <div
-                  className="h-1"
+                  className="absolute top-0 left-0 w-full h-1"
                   style={{ backgroundColor: module.borderColor }}
                 />
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon className={`h-5 w-5 ${module.iconColor}`} />
+                <div className="flex items-center gap-3 mb-4 mt-1">
+                  <div className={`w-10 h-10 rounded-xl bg-opacity-10 dark:bg-opacity-20 ${module.iconColor.replace('text-', 'bg-')} ${module.iconColor} flex items-center justify-center`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {module.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Generate detailed report for{" "}
-                    {module.title.toLowerCase()}
+                  </h3>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
+                    Generate detailed report for {module.title.toLowerCase()}
                   </p>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-3 pt-6">
+                </div>
+                <div className="mt-auto pt-6 flex flex-col gap-3">
                   <Button
                     onClick={() =>
                       handleGenerateReport(module.id, module.prefix)
                     }
                     disabled={isLoading}
-                    className="w-full flex justify-between items-center"
+                    className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                   >
                     {isLoading ? (
                       <>
@@ -230,8 +229,8 @@ export default function ReportsGenerationPage() {
                       </>
                     )}
                   </Button>
-                </CardFooter>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>

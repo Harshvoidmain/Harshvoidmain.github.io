@@ -17,17 +17,13 @@ import {
   FileBarChart,
   Download,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getDepartmentStyle } from "@/app/lib/theme";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Core styling classes for the "Liquid Glass" Grapho Aesthetic
+const glassCardClasses = "bg-white/40 backdrop-blur-3xl dark:bg-[#0A0A0A]/40 dark:backdrop-blur-3xl rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.16)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.24)] hover:bg-white/50 dark:hover:bg-[#0A0A0A]/50 sm:p-6 p-4";
+const glossyEdge = <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />;
 
 interface FacultyInfo {
   F_id: number;
@@ -178,8 +174,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
       a.href = url;
       a.download =
         result.data.filename ||
-        `${facultyInfo?.F_name?.replace(/\s+/g, "_")}_${moduleType}_report_${
-          new Date().toISOString().split("T")[0]
+        `${facultyInfo?.F_name?.replace(/\s+/g, "_")}_${moduleType}_report_${new Date().toISOString().split("T")[0]
         }.pdf`;
       document.body.appendChild(a);
       a.click();
@@ -278,61 +273,58 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
   return (
     <div className="space-y-6">
       {/* Faculty info header */}
-      <Card className="overflow-hidden">
+      <div className={`${glassCardClasses} relative group overflow-hidden`}>
+        {glossyEdge}
         <div
-          className="h-2"
+          className="absolute top-0 left-0 w-full h-2"
           style={{ backgroundColor: departmentStyle.primary }}
         />
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold"
-              style={{ backgroundColor: departmentStyle.primary }}
-            >
-              {facultyInfo.F_name.charAt(0)}
-            </div>
-            <div>
-              <CardTitle className="text-2xl">{facultyInfo.F_name}</CardTitle>
-              <CardDescription>
-                {facultyInfo.Current_Designation} | {facultyInfo.F_dept}
-              </CardDescription>
-            </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-2 relative z-10">
+          <div
+            className="w-20 h-20 rounded-[20px] flex items-center justify-center text-white text-3xl font-bold shadow-lg shrink-0"
+            style={{ backgroundColor: departmentStyle.primary }}
+          >
+            {facultyInfo.F_name.charAt(0)}
           </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-500">
-            Welcome to your faculty dashboard. Here you can manage all your
-            academic records including publications, research projects, and
-            more.
-          </p>
-        </CardContent>
-      </Card>
+          <div className="flex-1">
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{facultyInfo.F_name}</h2>
+            <div className="flex items-center gap-3 mt-1 text-sm font-semibold text-gray-500 dark:text-gray-400">
+              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full">{facultyInfo.Current_Designation}</span>
+              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full">{facultyInfo.F_dept}</span>
+            </div>
+            <p className="mt-4 text-[13px] font-medium text-gray-400 dark:text-gray-500 max-w-2xl">
+              Welcome to your faculty dashboard. Here you can manage all your academic records including publications, research projects, and more.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Module Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Publications Module */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
           <div
-            className="h-1"
+            className="absolute top-0 left-0 w-full h-1"
             style={{ backgroundColor: departmentStyle.primary }}
           />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
-              Publications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-blue-600">{facultyInfo.publications}</p>
-            <p className="text-sm text-gray-500 mt-1">
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Publications</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">{facultyInfo.publications}</p>
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Research papers and articles published
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/publications`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Publications
                 <ArrowRight className="h-4 w-4" />
@@ -340,7 +332,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("publications")}
                 disabled={generatingReport === "publications"}
               >
@@ -357,31 +349,32 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Research Projects */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#16a34a" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-green-600" />
-              Research Projects
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#16a34a" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center">
+              <Target className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Research Projects</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">
               {facultyInfo.research_projects}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Ongoing and completed research projects
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/research-projects`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Projects
                 <ArrowRight className="h-4 w-4" />
@@ -389,7 +382,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("research-projects")}
                 disabled={generatingReport === "research-projects"}
               >
@@ -406,31 +399,32 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Contributions */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#7c3aed" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-purple-600" />
-              Contributions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-purple-600">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#7c3aed" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <FileText className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contributions</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">
               {facultyInfo.total_contributions}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Academic contributions across categories
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/contributions`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Contributions
                 <ArrowRight className="h-4 w-4" />
@@ -438,7 +432,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("contributions")}
                 disabled={generatingReport === "contributions"}
               >
@@ -455,31 +449,32 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Workshops & Conferences */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#f59e0b" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-amber-600" />
-              Workshops & Conferences
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-amber-600">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#f59e0b" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Users className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Workshops & Conf.</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">
               {facultyInfo.workshops_attended}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Events attended or organized
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/workshops`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Events
                 <ArrowRight className="h-4 w-4" />
@@ -487,7 +482,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("workshops")}
                 disabled={generatingReport === "workshops"}
               >
@@ -504,29 +499,30 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Faculty Interactions */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#065f46" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-emerald-700" />
-              Faculty Interactions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{facultyInfo.interactions ?? 0}</p>
-            <p className="text-sm text-gray-500 mt-1">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#065f46" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
+              <Users className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Faculty Interactions</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">{facultyInfo.interactions ?? 0}</p>
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Speaker, auditor, judge roles in colleges
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/interactions`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Interactions
                 <ArrowRight className="h-4 w-4" />
@@ -534,7 +530,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("interactions")}
                 disabled={generatingReport === "interactions"}
               >
@@ -551,29 +547,30 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* FDP/STTP & Panels */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#1f2937" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-gray-800" />
-              FDP/STTP & Panels
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{facultyInfo.trainings ?? 0}</p>
-            <p className="text-sm text-gray-500 mt-1">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#1f2937" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 flex items-center justify-center">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">FDP/STTP & Panels</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">{facultyInfo.trainings ?? 0}</p>
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Attended, resource person, organized, UGC panels
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/trainings`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Training & Panels
                 <ArrowRight className="h-4 w-4" />
@@ -581,7 +578,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("trainings")}
                 disabled={generatingReport === "trainings"}
               >
@@ -598,31 +595,32 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Financial Support */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#7c2d12" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-orange-900" />
-              Financial Support
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#7c2d12" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-500 flex items-center justify-center">
+              <Briefcase className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Financial Support</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">
               {facultyInfo.financial_supports ?? 0}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Grants, sponsorships, and institutional support
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/financial-support`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Financial Support
                 <ArrowRight className="h-4 w-4" />
@@ -630,7 +628,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("financial-support")}
                 disabled={generatingReport === "financial-support"}
               >
@@ -647,29 +645,30 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Patents & Copyrights */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#4b5563" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <BookMarked className="h-5 w-5 text-gray-700" />
-              Patents & Copyrights
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{facultyInfo.patents ?? 0}</p>
-            <p className="text-sm text-gray-500 mt-1">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#4b5563" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 flex items-center justify-center">
+              <BookMarked className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Patents & Copyrights</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">{facultyInfo.patents ?? 0}</p>
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Intellectual property filings and registrations
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/patents`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage IP Records
                 <ArrowRight className="h-4 w-4" />
@@ -677,7 +676,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("patents")}
                 disabled={generatingReport === "patents"}
               >
@@ -694,31 +693,32 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Professional Memberships */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#dc2626" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-red-600" />
-              Professional Memberships
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-red-600">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#dc2626" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center justify-center">
+              <Globe className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Professional Memberships</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">
               {facultyInfo.professional_memberships}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Organizations and society memberships
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/memberships`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Memberships
                 <ArrowRight className="h-4 w-4" />
@@ -726,7 +726,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("memberships")}
                 disabled={generatingReport === "memberships"}
               >
@@ -743,29 +743,30 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
         {/* Awards & Recognitions */}
-        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-          <div className="h-1" style={{ backgroundColor: "#0ea5e9" }} />
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-sky-600" />
-              Awards & Recognitions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-sky-600">{facultyInfo.awards}</p>
-            <p className="text-sm text-gray-500 mt-1">
+        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
+          {glossyEdge}
+          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#0ea5e9" }} />
+          <div className="flex items-center gap-3 mb-4 mt-1">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+              <Award className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Awards & Recognitions</h3>
+          </div>
+          <div>
+            <p className="text-4xl font-black text-gray-900 dark:text-white">{facultyInfo.awards}</p>
+            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
               Honors and recognitions received
             </p>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-6">
+          </div>
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             <Link href={`/faculty/awards`} className="w-full">
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               >
                 Manage Awards
                 <ArrowRight className="h-4 w-4" />
@@ -773,7 +774,7 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
             </Link>
             {canGenerateReports() && (
               <Button
-                className="w-full flex justify-between items-center"
+                className="w-full flex justify-between items-center bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600"
                 onClick={() => generateModuleReport("awards")}
                 disabled={generatingReport === "awards"}
               >
@@ -790,8 +791,8 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
                 )}
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Information Management System Footer */}
@@ -808,45 +809,40 @@ function FacultyModulesSkeleton() {
   return (
     <div className="space-y-6">
       {/* Faculty info header skeleton */}
-      <Card className="overflow-hidden">
-        <div className="h-2 bg-gray-200" />
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Skeleton className="w-16 h-16 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
+      <div className={`${glassCardClasses} relative overflow-hidden animate-pulse`}>
+        <div className="h-2 bg-gray-200 dark:bg-gray-800" />
+        <div className="flex items-center gap-4 mt-4">
+          <Skeleton className="w-16 h-16 rounded-[20px]" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-5 w-32" />
           </div>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4 mt-2" />
-        </CardContent>
-      </Card>
+        </div>
+        <div className="mt-4">
+          <Skeleton className="h-4 w-full max-w-2xl" />
+          <Skeleton className="h-4 w-3/4 max-w-xl mt-2" />
+        </div>
+      </div>
 
       {/* Module Cards Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <div className="h-1 bg-gray-200" />
-            <CardHeader className="pb-2">
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16 mb-2" />
-              <Skeleton className="h-4 w-full" />
-            </CardContent>
-            <CardFooter>
-              <Skeleton className="h-10 w-full" />
-            </CardFooter>
-          </Card>
+          <div key={i} className={`${glassCardClasses} flex flex-col relative overflow-hidden animate-pulse`}>
+            <div className="h-1 bg-gray-200 dark:bg-gray-800 absolute top-0 left-0 w-full" />
+            <div className="flex items-center gap-3 mb-4 mt-1">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+            <div>
+              <Skeleton className="h-10 w-16" />
+              <Skeleton className="h-3 w-4/5 mt-2" />
+            </div>
+            <div className="mt-auto pt-6 flex flex-col gap-3">
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+            </div>
+          </div>
         ))}
-      </div>
-
-      {/* Footer Skeleton */}
-      <div className="mt-8 text-center">
-        <Skeleton className="h-4 w-64 mx-auto" />
       </div>
     </div>
   );

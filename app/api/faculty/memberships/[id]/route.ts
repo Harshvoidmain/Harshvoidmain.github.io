@@ -16,28 +16,19 @@ export async function PUT(
 ) {
   try {
     const { id: membershipId } = await params;
-    // Get user info from auth system
-    const authResponse = await fetch(`${request.nextUrl.origin}/api/auth/me`, {
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    });
+    // Get user using our robust server-side auth utility
+    const { getAuthUser } = await import("@/app/lib/auth-server");
+    const user = await getAuthUser(request);
 
-    if (!authResponse.ok) {
-      return NextResponse.json(
-        { success: false, message: "Authentication failed" },
-        { status: 401 }
-      );
-    }
-
-    const authData = await authResponse.json();
-
-    if (!authData.success || !authData.user) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
         { status: 401 }
       );
     }
+    
+    // Polyfill authData to avoid breaking existing downstream code
+    const authData = { success: true, user };
 
     // Only faculty, HOD, and admin can update memberships
     if (!["faculty", "hod", "admin"].includes(authData.user.role)) {
@@ -161,28 +152,19 @@ export async function DELETE(
 ) {
   try {
     const { id: deleteId } = await params;
-    // Get user info from auth system
-    const authResponse = await fetch(`${request.nextUrl.origin}/api/auth/me`, {
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    });
+    // Get user using our robust server-side auth utility
+    const { getAuthUser } = await import("@/app/lib/auth-server");
+    const user = await getAuthUser(request);
 
-    if (!authResponse.ok) {
-      return NextResponse.json(
-        { success: false, message: "Authentication failed" },
-        { status: 401 }
-      );
-    }
-
-    const authData = await authResponse.json();
-
-    if (!authData.success || !authData.user) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
         { status: 401 }
       );
     }
+    
+    // Polyfill authData to avoid breaking existing downstream code
+    const authData = { success: true, user };
 
     // Only faculty, HOD, and admin can delete memberships
     if (!["faculty", "hod", "admin"].includes(authData.user.role)) {
