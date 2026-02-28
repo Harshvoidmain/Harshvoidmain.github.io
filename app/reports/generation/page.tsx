@@ -171,14 +171,14 @@ export default function ReportsGenerationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 md:p-6 transition-colors duration-300">
       <div className="max-w-7xl">
         {/* Header - Left Aligned */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Reports Generation
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Generate comprehensive reports for each faculty module
           </p>
         </div>
@@ -192,7 +192,7 @@ export default function ReportsGenerationPage() {
             return (
               <Card
                 key={module.id}
-                className="overflow-hidden hover:shadow-md transition-shadow"
+                className="overflow-hidden hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-800"
               >
                 <div
                   className="h-1"
@@ -205,7 +205,7 @@ export default function ReportsGenerationPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Generate detailed report for{" "}
                     {module.title.toLowerCase()}
                   </p>
@@ -237,11 +237,11 @@ export default function ReportsGenerationPage() {
         </div>
 
         {/* Footer Info - Left Aligned */}
-        <div className="mt-12 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">
+        <div className="mt-12 p-6 bg-blue-50 dark:bg-indigo-900/20 border border-blue-200 dark:border-indigo-800 rounded-lg">
+          <h3 className="font-semibold text-blue-900 dark:text-indigo-300 mb-2">
             About Reports
           </h3>
-          <p className="text-blue-800 text-sm">
+          <p className="text-blue-800 dark:text-indigo-200 text-sm">
             Generate detailed reports for each faculty module to view
             analytics, statistics, and comprehensive data breakdowns.
             These reports can be filtered by various criteria and exported

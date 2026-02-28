@@ -1,7 +1,7 @@
 // app/layout.tsx
 import { AuthProvider } from "./providers/auth-provider";
-import { ThemeProvider } from "./providers/theme-provider";
 import { FacultyDataProvider } from "./providers/faculty-data-provider";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "IMS",
-  description:"Information Management System",
+  description: "Information Management System",
 };
 
 export default function RootLayout({
@@ -22,14 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <AuthProvider>
             <FacultyDataProvider>
               {children}
             </FacultyDataProvider>
-          </ThemeProvider>
-        </AuthProvider>
-        <Toaster 
+          </AuthProvider>
+        </ThemeProvider>
+        <Toaster
           position="top-right"
           expand={true}
           richColors

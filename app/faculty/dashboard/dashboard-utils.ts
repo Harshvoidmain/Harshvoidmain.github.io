@@ -64,17 +64,17 @@ export interface SessionInfo {
 }
 
 export const CHART_COLORS = [
-  "#93c5fd", 
-  "#d8b4fe", 
-  "#f8a4d4", 
-  "#fcd34d", 
-  "#6ee7b7", 
-  "#67e8f9", 
-  "#fca5a5", 
-  "#c7d2fe", 
-  "#86efac", 
+  "#93c5fd",
+  "#d8b4fe",
+  "#f8a4d4",
+  "#fcd34d",
+  "#6ee7b7",
+  "#67e8f9",
+  "#fca5a5",
+  "#c7d2fe",
+  "#86efac",
   "#bef264",
-  "#fed7aa", 
+  "#fed7aa",
 ];
 
 export const PUBLICATION_LABELS = {
@@ -85,10 +85,10 @@ export const PUBLICATION_LABELS = {
 };
 
 export const PUBLICATION_COLORS = {
-  journal: "#93c5fd", 
-  conference: "#d8b4fe", 
-  book_chapter: "#67e8f9", 
-  other: "#c7d2fe", 
+  journal: "#93c5fd",
+  conference: "#d8b4fe",
+  book_chapter: "#67e8f9",
+  other: "#c7d2fe",
 };
 
 /**
@@ -174,8 +174,8 @@ export const RESEARCH_LABELS = {
 };
 
 export const RESEARCH_COLORS = {
-  "ongoing": "#6ee7b7", 
-  "completed": "#93c5fd", 
+  "ongoing": "#6ee7b7",
+  "completed": "#93c5fd",
   "planned": "#fcd34d",
 };
 
@@ -460,4 +460,117 @@ export const processAwardData = (awards: AwardData[]): CategoryData => {
   );
 
   return { currentSessionData, allSessionsData };
+};
+
+// ─── Dynamic Aggregation Engine (Grapho Style Redesign) ─────────────────────
+
+/** 
+ * Gets overall distribution across all major categories 
+ * for the massive Donut chart (e.g., Publications vs Projects vs Workshops)
+ */
+export const getOverallDistribution = (data: {
+  publications: any[],
+  projects: any[],
+  contributions: any[],
+  workshops: any[],
+  memberships: any[],
+  awards: any[]
+}) => {
+  const distribution = [
+    { name: "Publications", value: data.publications.length, color: "#6366f1" },
+    { name: "Projects", value: data.projects.length, color: "#f59e0b" },
+    { name: "Contributions", value: data.contributions.length, color: "#ef4444" },
+    { name: "Workshops", value: data.workshops.length, color: "#22c55e" },
+    { name: "Memberships", value: data.memberships.length, color: "#ec4899" },
+    { name: "Awards", value: data.awards.length, color: "#f97316" }
+  ].filter(item => item.value > 0);
+
+  if (distribution.length === 0) {
+    return [{ name: "No Data", value: 1, color: "#374151" }];
+  }
+
+  return distribution;
+};
+
+/**
+ * Aggregates all activity types by year for the last 5 years
+ * to feed the main Yearly Trend BarChart.
+ */
+export const getYearlyActivityStats = (data: {
+  publications: Publication[],
+  projects: ResearchProject[],
+  workshops: Workshop[],
+  awards: AwardData[]
+}) => {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 4 + i);
+
+  const yearlyMap: Record<number, any> = {};
+  years.forEach(year => {
+    yearlyMap[year] = { name: year.toString(), Publications: 0, Projects: 0, Workshops: 0, Awards: 0 };
+  });
+
+  const extractYear = (dateStr: string) => {
+    if (!dateStr) return 0;
+    const y = parseInt(dateStr.split("-")[0]);
+    return isNaN(y) ? 0 : y;
+  };
+
+  data.publications.forEach(p => { const y = extractYear(p.publication_date); if (yearlyMap[y]) yearlyMap[y].Publications++; });
+  data.projects.forEach(p => { const y = extractYear(p.start_date); if (yearlyMap[y]) yearlyMap[y].Projects++; });
+  data.workshops.forEach(w => { const y = extractYear(w.start_date); if (yearlyMap[y]) yearlyMap[y].Workshops++; });
+  data.awards.forEach(a => { const y = extractYear(a.date); if (yearlyMap[y]) yearlyMap[y].Awards++; });
+
+  return years.map(year => yearlyMap[year]);
+};
+
+/**
+ * Merges all entities into a single chronologically sorted list of recent activities.
+ */
+export const getRecentActivities = (data: {
+  publications: Publication[],
+  projects: ResearchProject[],
+  awards: AwardData[],
+  workshops: Workshop[]
+}, limit: number = 5) => {
+  const activities: any[] = [];
+
+  data.publications.forEach(p => activities.push({
+    id: `pub-${p.id}`,
+    title: `Published a ${p.publication_type}`,
+    date: new Date(p.publication_date),
+    type: "Publication",
+    color: "#6366f1"
+  }));
+
+  data.projects.forEach(p => activities.push({
+    id: `proj-${p.id}`,
+    title: p.title || "Research Project",
+    date: new Date(p.start_date),
+    type: "Project",
+    color: "#f59e0b"
+  }));
+
+  data.awards.forEach(a => activities.push({
+    id: `award-${a.award_id}`,
+    title: a.award_name || "Award Received",
+    date: new Date(a.date),
+    type: "Award",
+    color: "#f97316"
+  }));
+
+  data.workshops.forEach(w => activities.push({
+    id: `ws-${w.id}`,
+    title: w.title || "Workshop Attended",
+    date: new Date(w.start_date),
+    type: "Workshop",
+    color: "#22c55e"
+  }));
+
+  activities.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  return activities.slice(0, limit).map(a => ({
+    ...a,
+    formattedDate: a.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  }));
 };
