@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/popover";
 import { getDepartmentStyle } from "@/app/lib/theme";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
 
 interface Department {
   Department_ID: number;
@@ -404,8 +403,8 @@ export default function DepartmentsPage() {
                   {establishmentYearFilter === "before-2000"
                     ? "Before 2000"
                     : establishmentYearFilter === "2000-2010"
-                    ? "2000-2010"
-                    : "After 2010"}
+                      ? "2000-2010"
+                      : "After 2010"}
                   <X
                     className="h-3 w-3 ml-1 cursor-pointer"
                     onClick={() => setEstablishmentYearFilter("all")}

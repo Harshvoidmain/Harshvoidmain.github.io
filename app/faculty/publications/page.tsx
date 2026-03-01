@@ -33,6 +33,8 @@ import {
   Link,
   Search,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CoAuthorSelector } from "@/app/components/faculty/CoAuthorSelector";
@@ -50,11 +52,11 @@ interface Publication {
   authors: string;
   publication_date: string;
   publication_type:
-    | "journal"
-    | "conference"
-    | "book"
-    | "book_chapter"
-    | "other";
+  | "journal"
+  | "conference"
+  | "book"
+  | "book_chapter"
+  | "other";
   publication_venue: string;
   doi: string | null;
   url: string | null;
@@ -73,11 +75,11 @@ interface PublicationFormData {
   authors: string;
   publication_date: string;
   publication_type:
-    | "journal"
-    | "conference"
-    | "book"
-    | "book_chapter"
-    | "other";
+  | "journal"
+  | "conference"
+  | "book"
+  | "book_chapter"
+  | "other";
   publication_venue: string;
   doi?: string;
   url?: string;
@@ -120,6 +122,9 @@ export default function FacultyPublicationsPage() {
     publication_type: "journal",
     publication_venue: "",
   });
+
+  const [isPublicationsDropdownOpen, setIsPublicationsDropdownOpen] = useState(true);
+  const [expandedPublicationId, setExpandedPublicationId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPublications();
@@ -732,16 +737,15 @@ export default function FacultyPublicationsPage() {
                         .map((p, idx) => {
                           const year =
                             p.publication_date &&
-                            !isNaN(new Date(p.publication_date).getTime())
+                              !isNaN(new Date(p.publication_date).getTime())
                               ? new Date(p.publication_date).getFullYear()
                               : "-";
                           const isExpanded = expandedPublicationId === p.id;
                           return (
                             <React.Fragment key={`pub-${p.id}`}>
                               <tr
-                                className={`border-t cursor-pointer hover:bg-gray-50 ${
-                                  isExpanded ? "bg-gray-50" : ""
-                                }`}
+                                className={`border-t cursor-pointer hover:bg-gray-50 ${isExpanded ? "bg-gray-50" : ""
+                                  }`}
                                 onClick={() =>
                                   setExpandedPublicationId(
                                     isExpanded ? null : p.id
@@ -1337,11 +1341,11 @@ export default function FacultyPublicationsPage() {
                   handleSelectChange(
                     "publication_type",
                     value as
-                      | "journal"
-                      | "conference"
-                      | "book"
-                      | "book_chapter"
-                      | "other"
+                    | "journal"
+                    | "conference"
+                    | "book"
+                    | "book_chapter"
+                    | "other"
                   )
                 }
               >

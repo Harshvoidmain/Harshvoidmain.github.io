@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { Suspense } from 'react';
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -48,7 +50,7 @@ interface FacultyData {
   dateOfJoining: string;
 }
 
-export default function FacultyReportPage() {
+function FacultyReportPageInner() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1055,5 +1057,13 @@ export default function FacultyReportPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function FacultyReportPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>}>
+      <FacultyReportPageInner />
+    </Suspense>
   );
 }

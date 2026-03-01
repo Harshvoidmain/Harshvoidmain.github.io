@@ -102,11 +102,15 @@ export default function Header() {
             className="flex items-center gap-2.5 h-9 pl-2 pr-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
           >
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+              {user?.name ? (user.name.replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/i, '').charAt(0).toUpperCase()) : "U"}
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-none truncate max-w-24">
-                {user?.name?.split(" ")[0] || "User"}
+              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-none truncate max-w-24" title={user?.name || "User"}>
+                {user?.name ? (
+                  user.name.match(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/i)
+                    ? user.name.split(" ").slice(0, 2).join(" ")
+                    : user.name.split(" ")[0]
+                ) : "User"}
               </p>
               <p className="text-[10px] text-gray-400 dark:text-gray-500 capitalize leading-none mt-0.5">
                 {user?.role || "faculty"}

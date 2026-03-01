@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     // Polyfill authData to avoid breaking existing downstream code
     const authData = { success: true, user };
 
@@ -121,14 +121,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const user = userData[0];
+    const dbUser = userData[0];
 
     // Get department name if user has a department
     let departmentName = null;
-    if (user.department_id) {
+    if (dbUser.department_id) {
       const departmentData = await query(
         `SELECT Department_Name FROM department WHERE Department_ID = ?`,
-        [user.department_id]
+        [dbUser.department_id]
       ) as Department[];
 
       if (
@@ -142,15 +142,15 @@ export async function GET(request: NextRequest) {
 
     // Initialize profile object with base user data
     const profile: ProfileData = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      department: user.department_id,
+      id: dbUser.id,
+      username: dbUser.username,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role,
+      department: dbUser.department_id,
       departmentName: departmentName,
-      joinDate: user.created_at,
-      lastLogin: user.last_login,
+      joinDate: dbUser.created_at,
+      lastLogin: dbUser.last_login,
       profileImage: "",
     };
 
@@ -287,9 +287,9 @@ export async function GET(request: NextRequest) {
           [username]
         ) as RowDataPacket[];
 
-        const workshopsCount = 
-          (workshopsData && Array.isArray(workshopsData) && workshopsData.length > 0 
-            ? workshopsData[0].workshops_attended || 0 
+        const workshopsCount =
+          (workshopsData && Array.isArray(workshopsData) && workshopsData.length > 0
+            ? workshopsData[0].workshops_attended || 0
             : 0) +
           (workshopContributionsData && Array.isArray(workshopContributionsData) && workshopContributionsData.length > 0
             ? workshopContributionsData[0].workshop_contributions || 0

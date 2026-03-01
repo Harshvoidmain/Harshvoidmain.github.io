@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/providers/auth-provider";
@@ -49,7 +50,7 @@ interface DashboardData {
   }[];
 }
 
-export default function PublicationsDashboardPage() {
+function PublicationsDashboardInner() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -152,7 +153,7 @@ export default function PublicationsDashboardPage() {
       } else {
         url = `/api/dashboard/institute`;
       }
-      
+
       console.log(`Fetching dashboard data from: ${url}`, { dashboardType, selectedId });
 
       const response = await fetch(url, {
@@ -314,10 +315,10 @@ export default function PublicationsDashboardPage() {
                 <SelectItem value="faculty">Faculty</SelectItem>
               </SelectContent>
             </Select>
-            
+
             {dashboardType === "department" && (
-              <Select 
-                value={selectedId || "all"} 
+              <Select
+                value={selectedId || "all"}
                 onValueChange={(value) => {
                   if (value === "all") {
                     setSelectedId("");
@@ -341,7 +342,7 @@ export default function PublicationsDashboardPage() {
                 </SelectContent>
               </Select>
             )}
-            
+
             {dashboardType === "faculty" && (
               <div className="flex gap-2">
                 <Input
@@ -438,14 +439,14 @@ export default function PublicationsDashboardPage() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value: number, name: string) => [
                         `${value} publications`,
                         name
                       ]}
                     />
-                    <Legend 
-                      formatter={(value: string, entry: any) => 
+                    <Legend
+                      formatter={(value: string, entry: any) =>
                         `${value}: ${entry.payload.count} (${((entry.payload.count / dashboardData.totalPublications) * 100).toFixed(1)}%)`
                       }
                     />
@@ -639,3 +640,11 @@ export default function PublicationsDashboardPage() {
   );
 }
 
+
+export default function PublicationsDashboardPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>}>
+      <PublicationsDashboardInner />
+    </Suspense>
+  );
+}

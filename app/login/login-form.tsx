@@ -3,175 +3,86 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/providers/auth-provider";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle2, LogIn, Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
+import {
+  AlertCircle,
+  CheckCircle2,
+  LogIn,
+  Eye,
+  EyeOff,
+  Sun,
+  Moon,
+  GraduationCap,
+  BookOpen,
+  Users,
+  BarChart3,
+} from "lucide-react";
 
-export default function LoginPage() {
+export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [loginDebug, setLoginDebug] = useState<string | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null); // Local error state
+  const [localError, setLocalError] = useState<string | null>(null);
   const { login, error, user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
   const message = searchParams.get("message");
 
-  // Check auth status cookie
-  const checkAuthStatusCookie = () => {
-    const cookies = document.cookie.split(";");
-    return cookies.some((cookie) => cookie.trim().startsWith("auth_status="));
-  };
+  useEffect(() => { setMounted(true); }, []);
 
-  const checkSessionTokenCookie = () => {
-    const cookies = document.cookie.split(";");
-    return cookies.some((cookie) => cookie.trim().startsWith("session_token="));
-  };
-  // Handle redirection after login with more robust approach
+  const checkAuthStatusCookie = () =>
+    document.cookie.split(";").some((c) => c.trim().startsWith("auth_status="));
+
+  const checkSessionTokenCookie = () =>
+    document.cookie.split(";").some((c) => c.trim().startsWith("session_token="));
+
   const doRedirect = (path: string) => {
-    const baseUrl = window.location.origin;
-    const targetUrl = baseUrl + path;
-
     setSuccessMessage(`Login successful! Redirecting to ${path}...`);
-    console.log(`Redirecting to: ${targetUrl}`);
-
-    // First store login state in sessionStorage as an immediate confirmation
     sessionStorage.setItem("loginSuccessful", "true");
     sessionStorage.setItem("loginRedirectPath", path);
-
-    // Add a preventLoop flag to avoid middleware redirecting back to login
     sessionStorage.setItem("preventAuthLoop", "true");
-
-    // Let cookie changes take effect before redirecting with a staged approach
     setTimeout(() => {
-      // Verify cookies are set before redirecting
       if (checkAuthStatusCookie() && checkSessionTokenCookie()) {
-        console.log("Auth cookies verified, proceeding with redirect");
         router.push(path);
       } else {
-        console.log("Auth cookies not yet detected, trying again...");
-        // Try again after a brief delay
-        setTimeout(() => {
-          console.log(
-            "Final redirect attempt, cookies status:",
-            checkAuthStatusCookie() ? "Auth Status: Yes" : "Auth Status: No",
-            checkSessionTokenCookie()
-              ? "Session Token: Yes"
-              : "Session Token: No"
-          );
-          // Use router.push instead of window.location for better Next.js integration
-          router.push(path);
-        }, 1000);
+        setTimeout(() => router.push(path), 1000);
       }
     }, 1000);
   };
-  // Check if user is already logged in on page load
+
   useEffect(() => {
-    // First check if we were redirected after login (prevent loops)
-    const loginJustCompleted =
-      sessionStorage.getItem("loginSuccessful") === "true";
+    const loginJustCompleted = sessionStorage.getItem("loginSuccessful") === "true";
     if (loginJustCompleted) {
-      // We just logged in, so don't trigger another redirect loop from here
-      console.log("Login just completed, preventing redirect loop");
-      // Clear the flag so future page loads will check normally
       sessionStorage.removeItem("loginSuccessful");
       return;
     }
-
     if (user) {
-      console.log("User found in context, redirecting to:", redirect);
       doRedirect(redirect);
-      return;
-    }
-
-    // If we have auth cookies but no user yet, try to fetch user info
-    if (!user && (checkAuthStatusCookie() || checkSessionTokenCookie())) {
-      console.log("Auth cookie found, attempting to verify session");
-
-      // Try to get user info
-      fetch("/api/auth/me", {
-        credentials: "include",
-        cache: "no-store", // Prevent caching
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          Pragma: "no-cache",
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.json().then((data) => {
-              console.log("Session verified successfully:", data.user?.email);
-
-              // Store user in sessionStorage for redundancy
-              if (data.user) {
-                sessionStorage.setItem("authUser", JSON.stringify(data.user));
-                // Wait a moment to ensure state updates properly before redirect
-                setTimeout(() => {
-                  doRedirect(redirect);
-                }, 500);
-              }
-            });
-          } else {
-            console.warn(
-              "Session verification failed with status:",
-              response.status
-            );
-            // Clear invalid auth cookies
-            document.cookie =
-              "auth_status=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie =
-              "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            setLoginDebug(
-              "Session verification failed. Please try logging in again."
-            );
-          }
-        })
-        .catch((err) => {
-          console.error("Error verifying session:", err);
-          setLoginDebug(
-            `Error verifying session: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        });
     }
   }, [user, redirect]);
 
-  // Success message from URL parameter
   useEffect(() => {
-    if (message) {
-      setSuccessMessage(message);
-    }
+    if (message) setSuccessMessage(message);
   }, [message]);
-  // Handle login form submission with improved error handling
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSuccessMessage(null);
-    setLoginDebug(null); // Clear any previous debug messages
-    setLocalError(null); // Clear local error state
+    setLocalError(null);
 
     try {
-      // Direct login approach to bypass potential issues with the auth context
       const response = await fetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -185,573 +96,235 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Login successful via direct API call");
-
-        // Store user data in sessionStorage
         if (data.user) {
           sessionStorage.setItem("authUser", JSON.stringify(data.user));
         }
-
-        // Use redirectUrl from API response if available, otherwise use default redirect
-        const redirectPath = data.redirectUrl || redirect;
-        console.log("Redirecting to:", redirectPath);
-
-        // Show success message and redirect
-        setSuccessMessage("Login successful! Redirecting...");
-        doRedirect(redirectPath);
+        doRedirect(data.redirectUrl || redirect);
       } else {
-        // Handle API error
         let errorData;
-        try {
-          errorData = await response.json();
-        } catch (jsonErr) {
-          errorData = { message: "Login failed" };
-        }
+        try { errorData = await response.json(); } catch { errorData = { message: "Login failed" }; }
         setLocalError(errorData.message || "Login failed");
-        if (typeof errorData === "object" && errorData !== null) {
-          console.error("Login API error:", errorData);
-        } else {
-          console.error("Login API error: Non-object response", errorData);
-        }
       }
     } catch (err) {
-      console.error("Login submission error:", err);
-      setLocalError(
-        "Login failed - please check your connection and try again"
-      );
-
-      // Fallback to context-based login as backup
-      try {
-        await login(username, password, rememberMe);
-
-        // Check for auth cookies after login attempt
-        setTimeout(() => {
-          if (checkAuthStatusCookie() || checkSessionTokenCookie()) {
-            setSuccessMessage(
-              "Login successful via fallback method! Redirecting..."
-            );
-            doRedirect(redirect);
-          }
-        }, 1000);
-      } catch (contextErr) {
-        console.error("Context login also failed:", contextErr);
-      }
+      setLocalError("Login failed - please check your connection and try again");
+      try { await login(username, password, rememberMe); } catch { }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Function to directly go to dashboard
-  const forceDashboard = () => {
-    doRedirect("/dashboard");
-  };
-  // Debug API connectivity and check auth status
-  const debugLoginApi = async () => {
-    try {
-      setLoginDebug("Testing API connectivity and auth status...");
-
-      // First check generic API connectivity
-      const apiResponse = await fetch("/api/debug/auth", {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!apiResponse.ok) {
-        setLoginDebug(
-          `API connectivity test failed: ${apiResponse.status} ${apiResponse.statusText}`
-        );
-        return;
-      }
-
-      // Now check auth status
-      const authStatusResponse = await fetch("/api/debug/auth-status", {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache",
-        },
-      });
-
-      if (!authStatusResponse.ok) {
-        setLoginDebug(
-          `Auth status check failed: ${authStatusResponse.status} ${authStatusResponse.statusText}`
-        );
-        return;
-      }
-
-      const data = await authStatusResponse.json();
-
-      // Format cookie information for display
-      const cookieInfo = data.cookies
-        .map(
-          (c: any) =>
-            `${c.name}=${
-              c.name === "session_token" ? "[REDACTED]" : c.value
-            }; path=${c.path}`
-        )
-        .join("\n");
-
-      // Format token information
-      const tokenInfo = data.authState.tokenValid
-        ? `Valid token for user ID: ${data.authState.tokenData.userId}, role: ${data.authState.tokenData.role}`
-        : `Token status: ${data.authState.tokenStatus}`;
-
-      // Format response as structured debug output
-      setLoginDebug(
-        `AUTH STATUS REPORT\n` +
-          `=================\n` +
-          `Timestamp: ${data.timestamp}\n` +
-          `Client cookies (browser): ${document.cookie}\n\n` +
-          `SERVER AUTH STATE:\n` +
-          `${tokenInfo}\n` +
-          `Auth status cookie: ${data.authState.authStatus}\n` +
-          `Token expires in: ${
-            data.authState.tokenData?.expiresIn
-              ? Math.round(data.authState.tokenData.expiresIn / 1000 / 60) +
-                " minutes"
-              : "N/A"
-          }\n\n` +
-          `SERVER COOKIES:\n${cookieInfo}\n\n` +
-          `Current URL: ${data.url}`
-      );
-    } catch (err) {
-      setLoginDebug(
-        `API test error: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-  };
-
-  // Test cookie functionality
-  const debugCookies = async () => {
-    try {
-      setLoginDebug("Testing cookie functionality...");
-      const response = await fetch("/api/debug/cookies", {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const textResponse = await response.text();
-        setLoginDebug(
-          `API returned non-JSON response: ${textResponse.substring(0, 100)}...`
-        );
-        return;
-      }
-
-      interface CookieTestResult {
-        timestamp: string;
-        cookies?: { name: string; value: string }[];
-      }
-
-      const data: CookieTestResult = await response.json();
-      const cookies = document.cookie.split(";");
-      const testCookie = cookies.some((cookie) =>
-        cookie.trim().startsWith("test_cookie=")
-      );
-      const authStatus = cookies.some((cookie) =>
-        cookie.trim().startsWith("auth_status=")
-      );
-      setLoginDebug(`Cookie Test Results:
-    Browser URL: ${window.location.href}
-    Browser cookies: ${cookies.map((c: string) => c.trim()).join(", ")}
-    Server cookies: ${
-      data.cookies?.map((c: { name: string }) => c.name).join(", ") || "none"
-    }
-    Test cookie set: ${testCookie ? "Yes" : "No"}
-    Auth status cookie: ${authStatus ? "Yes" : "No"}
-    Session token present: ${checkSessionTokenCookie() ? "Yes" : "No"}
-    Timestamp: ${data.timestamp}
-      `);
-
-      if (testCookie) {
-        setSuccessMessage(
-          "Cookie test successful. Cookies are working properly!"
-        );
-      } else {
-        setLoginDebug(
-          (prev) =>
-            `${prev}\n\nWARNING: Cookie test failed. This may indicate browser restrictions or issues with cookie settings.`
-        );
-      }
-    } catch (err) {
-      setLoginDebug(
-        `Cookie test error: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-  };
-
-  // Direct login function using debug endpoint
-  const directLogin = async () => {
-    try {
-      setLoginDebug("Attempting direct login...");
-      setIsSubmitting(true);
-      const testEmail = username || "hindavi815@gmail.com";
-
-      const response = await fetch("/api/debug/direct-login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: testEmail,
-          bypass: "debug-mode-bypass",
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLoginDebug(
-          `Direct login successful for: ${data.user.email} (${data.user.role})`
-        ); // Store the user info in sessionStorage
-        sessionStorage.setItem("authUser", JSON.stringify(data.user));
-
-        // Set a flag to prevent redirect loops
-        sessionStorage.setItem("preventAuthLoop", "true");
-
-        // Redirect to dashboard with delay to ensure cookies are set
-        doRedirect("/dashboard");
-      } else {
-        setLoginDebug(
-          `Direct login failed: ${response.status} ${response.statusText}`
-        );
-        try {
-          const errorData = await response.json();
-          setLoginDebug(
-            (prev) => `${prev}\nError: ${errorData.message || "Unknown error"}`
-          );
-        } catch (e) {
-          // Response might not be JSON
-        }
-      }
-    } catch (err) {
-      setLoginDebug(
-        `Direct login error: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Run full diagnostic test
-  const runDiagnostic = async () => {
-    try {
-      setLoginDebug("Running full diagnostic test...");
-
-      // Current browser information
-      const browserInfo = {
-        url: window.location.href,
-        origin: window.location.origin,
-        host: window.location.host,
-        hostname: window.location.hostname,
-        port: window.location.port || "default",
-        protocol: window.location.protocol,
-        cookies: document.cookie
-          .split(";")
-          .map((c) => c.trim())
-          .join(", "),
-      };
-
-      setLoginDebug(`
-DIAGNOSTIC REPORT
-================
-
-BROWSER INFORMATION:
-${JSON.stringify(browserInfo, null, 2)}
-
-CHECKING COOKIES:
-Auth status cookie: ${checkAuthStatusCookie() ? "Present" : "Missing"}
-Session token cookie: ${checkSessionTokenCookie() ? "Present" : "Missing"}
-
-RUNNING FURTHER TESTS...
-      `);
-
-      // Test API access
-      const diagnosticResponse = await fetch("/api/debug/diagnostic", {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Test direct login
-      const loginResponse = await fetch("/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "hindavi815@gmail.com",
-          password: "password123",
-          rememberMe: true,
-        }),
-      });
-
-      // Compile results
-      const diagnosticResults = diagnosticResponse.ok
-        ? await diagnosticResponse.json()
-        : {
-            error: `${diagnosticResponse.status} ${diagnosticResponse.statusText}`,
-          };
-
-      const loginResults = loginResponse.ok
-        ? await loginResponse.json()
-        : { error: `${loginResponse.status} ${loginResponse.statusText}` };
-
-      setLoginDebug(`
-DIAGNOSTIC REPORT
-================
-
-BROWSER INFORMATION:
-${JSON.stringify(browserInfo, null, 2)}
-
-API DIAGNOSTIC RESULTS:
-${JSON.stringify(diagnosticResults, null, 2)}
-
-TEST LOGIN RESULTS:
-${JSON.stringify(loginResults, null, 2)}
-
-COOKIE STATUS AFTER TESTS:
-Auth status cookie: ${checkAuthStatusCookie() ? "Present" : "Missing"}
-Session token cookie: ${checkSessionTokenCookie() ? "Present" : "Missing"}
-
-RECOMMENDATIONS:
-${
-  loginResponse.ok
-    ? "- Login API is working. Try Force Dashboard button to navigate directly."
-    : "- Login API failed. Check credentials and database connection."
-}
-${
-  !checkSessionTokenCookie()
-    ? "- Session cookies are not being set. This may be due to browser restrictions or CORS issues."
-    : "- Session cookies are successfully set."
-}
-- For Vercel deployment, ensure middleware.ts is properly configured
-- Check browser console for any JavaScript errors
-- Make sure JWT_SECRET is consistent across both local and deployed environments
-      `);
-    } catch (err) {
-      setLoginDebug(
-        `Diagnostic test error: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  };
+  const features = [
+    { icon: GraduationCap, label: "Faculty Management", desc: "Track staff, roles & activities" },
+    { icon: BookOpen, label: "Publications", desc: "Research & journal submissions" },
+    { icon: Users, label: "Departments", desc: "Org structure & HOD management" },
+    { icon: BarChart3, label: "Reports & Analytics", desc: "Insights at a glance" },
+  ];
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md overflow-hidden border-0 shadow-xl">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-1"></div>
-        <CardHeader className="space-y-2 text-center pb-6 pt-8">
-          <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>Sign in to access your IMS account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {successMessage && (
-            <div className="flex items-center gap-2 p-4 bg-green-50 text-green-700 text-sm rounded-md border border-green-100 mb-4">
-              <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
-              <span>{successMessage}</span>
-            </div>
-          )}
+    <div className="flex min-h-screen w-full">
+      {/* ── Left panel: branding / features ──────────────────────────── */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 flex-col justify-between p-12">
+        {/* Animated blobs */}
+        <div className="absolute top-[-80px] left-[-80px] w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-[-80px] right-[-80px] w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-blob animation-delay-2000" />
 
-          {error && (
-            <div className="flex items-center gap-2 p-4 bg-red-50 text-red-700 text-sm rounded-md border border-red-100 mb-4">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <span>{error}</span>
+        {/* Logo */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
-          )}
-
-          {localError && (
-            <div className="flex items-center gap-2 p-4 bg-red-50 text-red-700 text-sm rounded-md border border-red-100 mb-4">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <span>{localError}</span>
-            </div>
-          )}
-
-          {loginDebug && (
-            <div className="p-3 bg-gray-50 text-gray-700 text-xs rounded-md border border-gray-200 font-mono whitespace-pre-wrap mb-4 max-h-48 overflow-auto">
-              {loginDebug}
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
-              <Input
-                id="username"
-                name="username"
-                placeholder="Enter your Faculty ID or Roll Number"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="h-11"
-              />
-              <p className="text-xs text-gray-500">
-                For faculty/admin: Enter your Faculty ID
-                <br />
-                For student: Enter your Roll Number
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 pr-10"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="rememberMe"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked === true)}
-              />
-              <label
-                htmlFor="rememberMe"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Remember me
-              </label>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 transition-colors"
-              disabled={isSubmitting || !username || !password}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Sign in
-                </span>
-              )}
-            </Button>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={debugLoginApi}
-                className="text-xs text-gray-500 hover:text-gray-700 mr-2"
-              >
-                Debug API
-              </button>
-              <button
-                type="button"
-                onClick={debugCookies}
-                className="text-xs text-gray-500 hover:text-gray-700 mr-2"
-              >
-                Test Cookies
-              </button>
-              <button
-                type="button"
-                onClick={runDiagnostic}
-                className="text-xs text-gray-500 hover:text-gray-700 mr-2"
-              >
-                Full Diagnostic
-              </button>
-              <button
-                type="button"
-                onClick={directLogin}
-                className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded mr-2"
-              >
-                Direct Login
-              </button>
-              <button
-                type="button"
-                onClick={forceDashboard}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
-                Force Dashboard
-              </button>
-            </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4 pb-8">
-          <Separator className="my-2" />
-          <div className="text-center text-sm">
-            Don't have an account?{" "}
-            <Link
-              href="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-            >
-              Create an account
-            </Link>
+            <span className="text-white font-bold text-xl tracking-tight">IMS Portal</span>
           </div>
-        </CardFooter>
-      </Card>
+          <p className="text-white/60 text-sm">Fr. C. Rodrigues Institute of Technology</p>
+        </div>
+
+        {/* Hero text */}
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+            Your academic<br />hub, all in one<br />
+            <span className="text-white/70">place.</span>
+          </h1>
+          <p className="text-white/70 text-base leading-relaxed max-w-xs">
+            Manage faculty, publications, departments and generate insightful reports — seamlessly.
+          </p>
+        </div>
+
+        {/* Feature list */}
+        <div className="relative z-10 grid grid-cols-2 gap-4">
+          {features.map(({ icon: Icon, label, desc }) => (
+            <div key={label} className="flex flex-col gap-1 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-colors">
+              <Icon className="w-5 h-5 text-white/80 mb-1" />
+              <span className="text-white text-sm font-semibold">{label}</span>
+              <span className="text-white/60 text-xs leading-snug">{desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Right panel: login form ───────────────────────────────────── */}
+      <div className="flex-1 flex flex-col bg-background">
+        {/* Top bar with theme toggle */}
+        <div className="flex items-center justify-between px-8 pt-6">
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-foreground">IMS Portal</span>
+          </div>
+          <div className="hidden lg:block" />
+
+          {/* Dark / Light toggle */}
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-muted hover:bg-accent transition-colors text-sm text-muted-foreground hover:text-foreground"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <><Sun className="w-4 h-4" /><span>Light</span></>
+              ) : (
+                <><Moon className="w-4 h-4" /><span>Dark</span></>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Centered form */}
+        <div className="flex-1 flex items-center justify-center px-8 py-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground tracking-tight">Welcome back</h2>
+              <p className="mt-1 text-muted-foreground text-sm">Sign in to your IMS account</p>
+            </div>
+
+            {/* Alerts */}
+            {successMessage && (
+              <div className="flex items-start gap-3 p-3.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-sm rounded-xl border border-emerald-200 dark:border-emerald-800/50 mb-5">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
+            {(error || localError) && (
+              <div className="flex items-start gap-3 p-3.5 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm rounded-xl border border-red-200 dark:border-red-800/50 mb-5">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{localError || error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Username */}
+              <div className="space-y-1.5">
+                <Label htmlFor="username" className="text-sm font-medium text-foreground">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  name="username"
+                  placeholder="Faculty ID or Roll Number"
+                  type="text"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="h-11 rounded-xl border-border bg-background focus-visible:ring-indigo-500 focus-visible:border-indigo-500"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Faculty/Admin: Faculty ID &nbsp;·&nbsp; Student: Roll Number
+                </p>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                    Password
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 pr-11 rounded-xl border-border bg-background focus-visible:ring-indigo-500 focus-visible:border-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember me */}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className="text-sm text-muted-foreground cursor-pointer select-none"
+                >
+                  Remember me for 30 days
+                </label>
+              </div>
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] transition-all font-semibold text-white shadow-md shadow-indigo-500/20"
+                disabled={isSubmitting || !username || !password}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Signing in…
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <LogIn className="h-4 w-4" />
+                    Sign in
+                  </span>
+                )}
+              </Button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/register"
+                className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+              >
+                Create one
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

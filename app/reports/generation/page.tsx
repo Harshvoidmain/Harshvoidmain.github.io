@@ -16,10 +16,7 @@ import {
   Cpu,
   MessageCircle,
 } from "lucide-react";
-
-// Core styling classes for the "Liquid Glass" Grapho Aesthetic
-const glassCardClasses = "bg-white/40 backdrop-blur-3xl dark:bg-[#0A0A0A]/40 dark:backdrop-blur-3xl rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.16)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.24)] hover:bg-white/50 dark:hover:bg-[#0A0A0A]/50 sm:p-6 p-4";
-const glossyEdge = <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />;
+import { BioluminescentGrid, BioluminescentGridItem } from "@/components/ui/bioluminescent-grid";
 
 const FACULTY_MODULES = [
   {
@@ -168,30 +165,29 @@ export default function ReportsGenerationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 md:p-6 transition-colors duration-300">
+    <div className="min-h-screen p-4 md:p-6 transition-colors duration-300">
       <div className="max-w-7xl">
         {/* Header - Left Aligned */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl font-black text-foreground tracking-tight">
             Reports Generation
           </h1>
-          <p className="text-[13px] font-medium text-gray-400 dark:text-gray-500 max-w-2xl mt-2">
+          <p className="text-[13px] font-medium text-muted-foreground max-w-2xl mt-2">
             Generate comprehensive reports for each faculty module
           </p>
         </div>
 
         {/* Modules Grid - Matching Faculty Module Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <BioluminescentGrid>
           {FACULTY_MODULES.map((module) => {
             const Icon = module.icon;
             const isLoading = loadingModule === module.id;
 
             return (
-              <div
+              <BioluminescentGridItem
                 key={module.id}
-                className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}
+                className="flex flex-col group transition-all duration-300 hover:-translate-y-1"
               >
-                {glossyEdge}
                 <div
                   className="absolute top-0 left-0 w-full h-1"
                   style={{ backgroundColor: module.borderColor }}
@@ -200,12 +196,12 @@ export default function ReportsGenerationPage() {
                   <div className={`w-10 h-10 rounded-xl bg-opacity-10 dark:bg-opacity-20 ${module.iconColor.replace('text-', 'bg-')} ${module.iconColor} flex items-center justify-center`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                     {module.title}
                   </h3>
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-1">
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mt-1">
                     Generate detailed report for {module.title.toLowerCase()}
                   </p>
                 </div>
@@ -230,17 +226,17 @@ export default function ReportsGenerationPage() {
                     )}
                   </Button>
                 </div>
-              </div>
+              </BioluminescentGridItem>
             );
           })}
-        </div>
+        </BioluminescentGrid>
 
         {/* Footer Info - Left Aligned */}
-        <div className="mt-12 p-6 bg-blue-50 dark:bg-indigo-900/20 border border-blue-200 dark:border-indigo-800 rounded-lg">
-          <h3 className="font-semibold text-blue-900 dark:text-indigo-300 mb-2">
+        <div className="mt-12 p-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+          <h3 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2">
             About Reports
           </h3>
-          <p className="text-blue-800 dark:text-indigo-200 text-sm">
+          <p className="text-indigo-800 dark:text-indigo-200 text-sm">
             Generate detailed reports for each faculty module to view
             analytics, statistics, and comprehensive data breakdowns.
             These reports can be filtered by various criteria and exported

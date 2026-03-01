@@ -18,6 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BioluminescentGrid, BioluminescentGridItem } from "@/components/ui/bioluminescent-grid";
 import { getDepartmentStyle } from "@/app/lib/theme";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -198,6 +199,14 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
     );
   };
 
+  const getCardSpan = (count?: number) => {
+    const c = count || 0;
+    if (c >= 20) return "md:col-span-2 lg:col-span-2 lg:row-span-2";
+    if (c >= 10) return "md:col-span-2 lg:col-span-1";
+    if (c >= 5) return "md:col-span-1 lg:col-span-1";
+    return "col-span-1";
+  };
+
   const handleDownloadReport = async () => {
     try {
       setReportLoading(true);
@@ -300,10 +309,9 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
       </div>
 
       {/* Module Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <BioluminescentGrid>
         {/* Publications Module */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.publications)}`}>
           <div
             className="absolute top-0 left-0 w-full h-1"
             style={{ backgroundColor: departmentStyle.primary }}
@@ -350,11 +358,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Research Projects */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.research_projects)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#16a34a" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center">
@@ -400,11 +407,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Contributions */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.total_contributions)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#7c3aed" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
@@ -450,11 +456,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Workshops & Conferences */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.workshops_attended)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#f59e0b" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
@@ -500,11 +505,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Faculty Interactions */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.interactions)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#065f46" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
@@ -548,11 +552,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* FDP/STTP & Panels */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.trainings)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#1f2937" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 flex items-center justify-center">
@@ -596,11 +599,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Financial Support */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.financial_supports)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#7c2d12" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-500 flex items-center justify-center">
@@ -646,11 +648,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Patents & Copyrights */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.patents)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#4b5563" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 flex items-center justify-center">
@@ -694,11 +695,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Professional Memberships */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.professional_memberships)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#dc2626" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center justify-center">
@@ -744,11 +744,10 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
+        </BioluminescentGridItem>
 
         {/* Awards & Recognitions */}
-        <div className={`${glassCardClasses} flex flex-col relative group overflow-hidden hover:-translate-y-1`}>
-          {glossyEdge}
+        <BioluminescentGridItem className={`flex flex-col group transition-all duration-300 hover:-translate-y-1 ${getCardSpan(facultyInfo.awards)}`}>
           <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "#0ea5e9" }} />
           <div className="flex items-center gap-3 mb-4 mt-1">
             <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
@@ -792,8 +791,8 @@ export default function FacultyModules({ facultyId }: FacultyModulesProps) {
               </Button>
             )}
           </div>
-        </div>
-      </div>
+        </BioluminescentGridItem>
+      </BioluminescentGrid>
 
       {/* Information Management System Footer */}
       <div className="mt-8 text-center">

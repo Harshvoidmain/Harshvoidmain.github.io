@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { Suspense } from 'react';
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -58,7 +60,7 @@ interface CategoryBreakdown {
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
-export default function PublicationsReportPage() {
+function PublicationsReportPageInner() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -661,3 +663,11 @@ export default function PublicationsReportPage() {
   );
 }
 
+
+export default function PublicationsReportPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>}>
+      <PublicationsReportPageInner />
+    </Suspense>
+  );
+}

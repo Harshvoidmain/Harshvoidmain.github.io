@@ -262,11 +262,11 @@ export default function ProfilePage() {
   return (
     <MainLayout>
       <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
+        <h1 className="text-2xl font-semibold text-foreground">My Profile</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Profile Card */}
-          <Card className="md:col-span-1">
+          <Card className="md:col-span-1 bg-card text-card-foreground border-border shadow-sm">
             <CardHeader className="pb-0">
               <CardTitle>Profile Information</CardTitle>
             </CardHeader>
@@ -289,15 +289,15 @@ export default function ProfilePage() {
               <h2 className="text-xl font-semibold mb-1">
                 {profile?.name || profile?.username}
               </h2>
-              <p className="text-sm text-gray-500 mb-1 capitalize">
+              <p className="text-sm text-muted-foreground mb-1 capitalize">
                 {profile?.role}
               </p>
               {profile?.designation && (
-                <p className="text-sm text-indigo-600 font-medium">
+                <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
                   {profile.designation}
                 </p>
               )}{" "}
-              <div className="w-full border-t border-gray-200 pt-4 mt-4 space-y-2">
+              <div className="w-full border-t border-border pt-4 mt-4 space-y-2">
                 <Button
                   className="w-full"
                   variant="outline"
@@ -310,7 +310,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* User Details */}
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-2 bg-card text-card-foreground border-border shadow-sm">
             <CardHeader>
               <CardTitle>User Details</CardTitle>
             </CardHeader>
@@ -320,38 +320,38 @@ export default function ProfilePage() {
                 onValueChange={setCurrentTab}
                 className="space-y-4"
               >
-                <TabsList className="grid grid-cols-3">
-                  <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsList className="grid grid-cols-3 bg-muted">
+                  <TabsTrigger value="basic" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Basic Info</TabsTrigger>
                   {(profile?.role === "faculty" || profile?.role === "hod") && (
-                    <TabsTrigger value="academic">Academic Info</TabsTrigger>
+                    <TabsTrigger value="academic" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Academic Info</TabsTrigger>
                   )}
                   {(profile?.role === "faculty" || profile?.role === "hod") && (
-                    <TabsTrigger value="signature">Signature</TabsTrigger>
+                    <TabsTrigger value="signature" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Signature</TabsTrigger>
                   )}
                 </TabsList>
 
                 <TabsContent value="basic">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start gap-3">
-                      <UserIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <UserIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Username / ID</p>
+                        <p className="text-sm text-muted-foreground">Username / ID</p>
                         <p className="font-medium">{profile?.username}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <EnvelopeIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <EnvelopeIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="text-sm text-muted-foreground">Email</p>
                         <p className="font-medium">{profile?.email}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <BuildingOfficeIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <BuildingOfficeIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Department</p>
+                        <p className="text-sm text-muted-foreground">Department</p>
                         <p className="font-medium">
                           {profile?.departmentName || "Not assigned"}
                         </p>
@@ -359,9 +359,9 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <AcademicCapIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <AcademicCapIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Role</p>
+                        <p className="text-sm text-muted-foreground">Role</p>
                         <p className="font-medium capitalize">
                           {profile?.role}
                         </p>
@@ -369,9 +369,9 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <CalendarIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Joined On</p>
+                        <p className="text-sm text-muted-foreground">Joined On</p>
                         <p className="font-medium">
                           {formatDate(profile?.joinDate)}
                         </p>
@@ -379,9 +379,9 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <ClockIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-500">Last Login</p>
+                        <p className="text-sm text-muted-foreground">Last Login</p>
                         <p className="font-medium">
                           {formatDate(profile?.lastLogin) || "First login"}
                         </p>
@@ -391,9 +391,9 @@ export default function ProfilePage() {
                     {/* Show enrollment number for student */}
                     {profile?.role === "student" && profile?.enrollmentNo && (
                       <div className="flex items-start gap-3">
-                        <UserIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                        <UserIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                         <div>
-                          <p className="text-sm text-gray-500">Enrollment No</p>
+                          <p className="text-sm text-muted-foreground">Enrollment No</p>
                           <p className="font-medium">{profile.enrollmentNo}</p>
                         </div>
                       </div>
@@ -402,9 +402,9 @@ export default function ProfilePage() {
                     {/* Show semester and program for student */}
                     {profile?.role === "student" && profile?.semester && (
                       <div className="flex items-start gap-3">
-                        <AcademicCapIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                        <AcademicCapIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                         <div>
-                          <p className="text-sm text-gray-500">Semester</p>
+                          <p className="text-sm text-muted-foreground">Semester</p>
                           <p className="font-medium">{profile.semester}</p>
                         </div>
                       </div>
@@ -412,9 +412,9 @@ export default function ProfilePage() {
 
                     {profile?.role === "student" && profile?.program && (
                       <div className="flex items-start gap-3">
-                        <AcademicCapIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                        <AcademicCapIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                         <div>
-                          <p className="text-sm text-gray-500">Program</p>
+                          <p className="text-sm text-muted-foreground">Program</p>
                           <p className="font-medium">{profile.program}</p>
                         </div>
                       </div>
@@ -427,9 +427,9 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {profile?.designation && (
                         <div className="flex items-start gap-3">
-                          <BriefcaseIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <BriefcaseIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">Designation</p>
+                            <p className="text-sm text-muted-foreground">Designation</p>
                             <p className="font-medium">{profile.designation}</p>
                           </div>
                         </div>
@@ -437,9 +437,9 @@ export default function ProfilePage() {
 
                       {profile?.qualification && (
                         <div className="flex items-start gap-3">
-                          <AcademicCapIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <AcademicCapIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Highest Qualification
                             </p>
                             <p className="font-medium">
@@ -451,9 +451,9 @@ export default function ProfilePage() {
 
                       {profile?.experience !== undefined && (
                         <div className="flex items-start gap-3">
-                          <BriefcaseIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <BriefcaseIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Teaching Experience
                             </p>
                             <p className="font-medium">
@@ -465,9 +465,9 @@ export default function ProfilePage() {
 
                       {profile?.phone && (
                         <div className="flex items-start gap-3">
-                          <EnvelopeIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <EnvelopeIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Contact Number
                             </p>
                             <p className="font-medium">{profile.phone}</p>
@@ -477,9 +477,9 @@ export default function ProfilePage() {
 
                       {profile?.publications && (
                         <div className="flex items-start gap-3">
-                          <DocumentTextIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <DocumentTextIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Publications
                             </p>
                             <p className="font-medium">
@@ -491,9 +491,9 @@ export default function ProfilePage() {
 
                       {profile?.researchProjects !== undefined && (
                         <div className="flex items-start gap-3">
-                          <DocumentTextIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <DocumentTextIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Research Projects
                             </p>
                             <p className="font-medium">
@@ -505,9 +505,9 @@ export default function ProfilePage() {
 
                       {profile?.professionalMemberships !== undefined && (
                         <div className="flex items-start gap-3">
-                          <UsersIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <UsersIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Professional Memberships
                             </p>
                             <p className="font-medium">
@@ -519,9 +519,9 @@ export default function ProfilePage() {
 
                       {profile?.totalContributions !== undefined && (
                         <div className="flex items-start gap-3">
-                          <DocumentTextIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <DocumentTextIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               Total Contributions
                             </p>
                             <p className="font-medium">
@@ -548,12 +548,12 @@ export default function ProfilePage() {
                   </TabsContent>
                 )}
               </Tabs>{" "}
-              <div className="pt-4 mt-4 border-t border-gray-200">
+              <div className="pt-4 mt-4 border-t border-border">
                 <div className="flex flex-col sm:flex-row gap-2 justify-between">
                   <Button
                     onClick={() => router.push("/profile/change-password")}
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 border-border hover:bg-accent hover:text-accent-foreground"
                   >
                     <KeyIcon className="h-4 w-4" />
                     Change Password
@@ -561,18 +561,18 @@ export default function ProfilePage() {
                   <div className="flex flex-col sm:flex-row gap-2">
                     {(profile?.role === "faculty" ||
                       profile?.role === "hod") && (
-                      <Button
-                        onClick={handleGenerateComprehensiveReport}
-                        variant="default"
-                        className="flex items-center gap-2"
-                        disabled={biodataLoading}
-                      >
-                        <DocumentArrowDownIcon className="h-4 w-4" />
-                        {biodataLoading
-                          ? "Generating..."
-                          : "Comprehensive Report"}
-                      </Button>
-                    )}
+                        <Button
+                          onClick={handleGenerateComprehensiveReport}
+                          variant="default"
+                          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                          disabled={biodataLoading}
+                        >
+                          <DocumentArrowDownIcon className="h-4 w-4" />
+                          {biodataLoading
+                            ? "Generating..."
+                            : "Comprehensive Report"}
+                        </Button>
+                      )}
                   </div>
                 </div>
               </div>
@@ -581,7 +581,7 @@ export default function ProfilePage() {
 
           {/* Achievements */}
           {profile?.achievements && profile.achievements.length > 0 && (
-            <Card className="md:col-span-3">
+            <Card className="md:col-span-3 bg-card text-card-foreground border-border shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <TrophyIcon className="h-5 w-5 mr-2 text-yellow-500" />
@@ -593,15 +593,15 @@ export default function ProfilePage() {
                   {profile.achievements.map((achievement) => (
                     <div
                       key={achievement.id}
-                      className="p-4 border rounded-lg hover:bg-gray-50"
+                      className="p-4 border border-border rounded-lg bg-card hover:bg-accent transition-colors"
                     >
                       <div className="flex justify-between items-start">
-                        <h3 className="font-medium">{achievement.title}</h3>
-                        <span className="text-sm text-gray-500">
+                        <h3 className="font-medium text-foreground">{achievement.title}</h3>
+                        <span className="text-sm text-muted-foreground">
                           {formatDate(achievement.date)}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {/* Remove year in parentheses at end of description */}
                         {achievement.description.replace(/\s*\(\d{4}\)$/, "")}
                       </p>
