@@ -1,0 +1,4 @@
+Field,Type,Null,Key,Default,Extra
+F_id,bigint,NO,PRI,NULL,auto_increment
+F_name,varchar(255),NO,,NULL,
+F_dept,text,NO,,NULL,

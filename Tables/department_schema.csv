@@ -1,0 +1,3 @@
+Field,Type,Null,Key,Default,Extra
+Department_ID,int,NO,PRI,NULL,auto_increment
+Department_Name,varchar(255),NO,,NULL,
