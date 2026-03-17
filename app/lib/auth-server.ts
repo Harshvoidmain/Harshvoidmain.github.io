@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { query } from "@/app/lib/db";
 import * as jose from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "default-very-strong-secret-key";
 
 export async function getAuthUser(request: NextRequest) {
     try {
