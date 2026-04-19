@@ -4,16 +4,16 @@ import mysql from 'mysql2/promise';
 async function testConnection() {
   try {
     console.log('Testing MySQL connection...');
-    console.log('Host:', process.env.MYSQL_HOST || 'localhost');
-    console.log('User:', process.env.MYSQL_USER || 'root');
-    console.log('Database:', process.env.MYSQL_DATABASE || 'railway');
+    console.log('Host:', process.env.MYSQL_HOST || 'sql12.freesqldatabase.com');
+    console.log('User:', process.env.MYSQL_USER || 'sql12823670');
+    console.log('Database:', process.env.MYSQL_DATABASE || 'sql12823670');
     
     const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST || 'localhost',
+      host: process.env.MYSQL_HOST || 'sql12.freesqldatabase.com',
       port: parseInt(process.env.MYSQL_PORT || '3306'),
-      user: process.env.MYSQL_USER || 'root',
-      password: process.env.MYSQL_PASSWORD || '12345678',
-      database: process.env.MYSQL_DATABASE || 'railway',
+      user: process.env.MYSQL_USER || 'sql12823670',
+      password: process.env.MYSQL_PASSWORD || 'p8drE6VzYl',
+      database: process.env.MYSQL_DATABASE || 'sql12823670',
     });
 
     console.log('✅ Connected successfully!');
