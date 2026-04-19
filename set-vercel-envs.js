@@ -1,9 +1,9 @@
 const vars = {
-    MYSQL_HOST: 'shortline.proxy.rlwy.net',
-    MYSQL_PORT: '43104',
-    MYSQL_USER: 'root',
-    MYSQL_PASSWORD: 'kNIcPmbOizdhWFISEvyzraMAQgwhzoKE',
-    MYSQL_DATABASE: 'railway'
+    MYSQL_HOST: 'sql12.freesqldatabase.com',
+    MYSQL_PORT: '3306',
+    MYSQL_USER: 'sql12823670',
+    MYSQL_PASSWORD: 'p8drE6VzYl',
+    MYSQL_DATABASE: 'sql12823670'
 };
 const { execSync } = require('child_process');
 

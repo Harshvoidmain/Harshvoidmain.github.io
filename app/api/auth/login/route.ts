@@ -222,9 +222,22 @@ export async function POST(request: NextRequest) {
     console.log(`Login successful for user: ${user.username}`);
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : "";
+    
+    console.error("❌ LOGIN ERROR:", errorMessage);
+    if (errorStack) console.error("Stack:", errorStack);
+    
+    // Log environment info for debugging
+    console.error("DEBUG INFO:", {
+      NODE_ENV: process.env.NODE_ENV,
+      MYSQL_HOST: process.env.MYSQL_HOST,
+      JWT_SECRET_LENGTH: process.env.JWT_SECRET?.length || 0,
+      NEXTAUTH_SECRET_LENGTH: process.env.NEXTAUTH_SECRET?.length || 0,
+    });
+    
     return NextResponse.json(
-      { success: false, message: "Authentication failed" },
+      { success: false, message: "Authentication failed. Check server logs." },
       { status: 500 }
     );
   }
