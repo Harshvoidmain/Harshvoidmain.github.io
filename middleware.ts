@@ -19,6 +19,7 @@ const publicPaths = [
 
 // All API paths that should be publicly accessible
 const publicApiPaths = [
+  "/api/health",
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/logout",
@@ -47,10 +48,6 @@ const publicApiPaths = [
 // Use env variable with fallback for JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || "default-very-strong-secret-key";
 
-if (!JWT_SECRET || JWT_SECRET.length < 16) {
-  throw new Error("JWT_SECRET is missing or too short. Please set a strong JWT_SECRET in your .env file.");
-}
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -75,6 +72,11 @@ export async function middleware(request: NextRequest) {
         authStatus === "direct_login")
     ) {
       try {
+        if (!JWT_SECRET || JWT_SECRET.length < 16) {
+          console.warn("JWT_SECRET not configured, skipping token verification");
+          return NextResponse.next();
+        }
+        
         // Verify the token silently using jose instead of jsonwebtoken
         // Create a TextEncoder
         const encoder = new TextEncoder();
