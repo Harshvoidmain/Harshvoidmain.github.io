@@ -1,0 +1,50 @@
+name: Deploy to Vercel and Set Environment Variables
+
+on:
+  push:
+    branches:
+      - Main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Set Vercel environment variables
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: prj_tMPjUIiMACl76YiRI25iBA6ntWuE
+          VERCEL_ORG_ID: team_DFoHnq1AzLHMIpnUPNyaSLkd
+        run: |
+          npm install -g vercel
+
+          # Remove old environment variables if they exist
+          npx vercel env rm MYSQL_HOST production -y || true
+          npx vercel env rm MYSQL_PORT production -y || true
+          npx vercel env rm MYSQL_USER production -y || true
+          npx vercel env rm MYSQL_PASSWORD production -y || true
+          npx vercel env rm MYSQL_DATABASE production -y || true
+
+          # Add new environment variables
+          echo "sql12.freesqldatabase.com" | npx vercel env add MYSQL_HOST production
+          echo "3306" | npx vercel env add MYSQL_PORT production
+          echo "sql12823670" | npx vercel env add MYSQL_USER production
+          echo "p8drE6VzYl" | npx vercel env add MYSQL_PASSWORD production
+          echo "sql12823670" | npx vercel env add MYSQL_DATABASE production
+
+          echo "✅ Environment variables updated successfully"
+
+      - name: Deploy to Vercel
+        uses: vercel/action@v1
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: team_DFoHnq1AzLHMIpnUPNyaSLkd
+          vercel-project-id: prj_tMPjUIiMACl76YiRI25iBA6ntWuE
