@@ -1,0 +1,188 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('superadmin');
+    }
+
+    function isAdmin() {
+      return hasRole('admin') || isSuperAdmin();
+    }
+
+    function isHOD() {
+      return hasRole('hod') || isAdmin();
+    }
+
+    function isFaculty() {
+      return hasRole('faculty') || isHOD();
+    }
+
+    function isStaff() {
+      return hasRole('staff') || isHOD();
+    }
+
+    function isStudent() {
+      return hasRole('student');
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isInDepartment(deptId) {
+      return isAuthenticated() && getUserData().departmentId == deptId;
+    }
+
+    function isHODOfDepartment(deptId) {
+      return hasRole('hod') && isInDepartment(deptId);
+    }
+
+    function isAdminOrAbove() {
+      return isAdmin() || isSuperAdmin();
+    }
+
+    // Institution document
+    match /institutions/{institutionId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdminOrAbove();
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() || isOwner(userId);
+      allow delete: if isSuperAdmin();
+    }
+
+    // Departments collection
+    match /departments/{departmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrAbove();
+      allow update: if isAdminOrAbove();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Faculty collection
+    match /faculty/{facultyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrAbove();
+      allow update: if isAdminOrAbove() ||
+        (isOwner(resource.data.userId)) ||
+        (hasRole('hod') && isInDepartment(resource.data.departmentId));
+      allow delete: if isAdminOrAbove();
+
+      // Faculty subcollections
+      match /publications/{pubId} {
+        allow read: if isAuthenticated();
+        allow create: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId) ||
+          (hasRole('hod') && isInDepartment(get(/databases/$(database)/documents/faculty/$(facultyId)).data.departmentId));
+        allow update: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId) ||
+          (hasRole('hod') && isInDepartment(get(/databases/$(database)/documents/faculty/$(facultyId)).data.departmentId));
+        allow delete: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /researchProjects/{projectId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /awards/{awardId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /workshops/{workshopId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /memberships/{membershipId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /patents/{patentId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /contributions/{contribId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /interactions/{interactionId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /financialSupport/{supportId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+
+      match /qualifications/{qualId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdminOrAbove() ||
+          isOwner(get(/databases/$(database)/documents/faculty/$(facultyId)).data.userId);
+      }
+    }
+
+    // Students collection
+    match /students/{studentId} {
+      allow read: if isAuthenticated() && (
+        isAdminOrAbove() ||
+        isHOD() ||
+        hasRole('staff') ||
+        isOwner(resource.data.userId)
+      );
+      allow create: if isAdminOrAbove() || hasRole('staff');
+      allow update: if isAdminOrAbove() || hasRole('staff') ||
+        isOwner(resource.data.userId);
+      allow delete: if isAdminOrAbove();
+    }
+
+    // Reports collection
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && (
+        isAdminOrAbove() ||
+        isOwner(resource.data.generatedBy)
+      );
+      allow create: if isAuthenticated();
+      allow delete: if isAdminOrAbove() || isOwner(resource.data.generatedBy);
+    }
+
+    // Audit logs — read only for superadmin, write via Cloud Functions
+    match /auditLogs/{logId} {
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

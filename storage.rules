@@ -1,0 +1,60 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isPdfFile() {
+      return request.resource.contentType == 'application/pdf';
+    }
+
+    function isDocumentFile() {
+      return isPdfFile() ||
+        request.resource.contentType.matches('application/msword') ||
+        request.resource.contentType.matches('application/vnd.openxmlformats.*');
+    }
+
+    function isUnder5MB() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    function isUnder10MB() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Faculty profile photos and documents
+    match /faculty/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId &&
+        (
+          (isImageFile() && isUnder5MB()) ||
+          (isDocumentFile() && isUnder10MB())
+        );
+    }
+
+    // Department assets
+    match /departments/{deptId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        (isImageFile() && isUnder5MB() || isDocumentFile() && isUnder10MB());
+    }
+
+    // Institution branding (superadmin/admin only for write)
+    match /institution/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isUnder5MB();
+    }
+
+    // Generated reports
+    match /reports/{reportId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isPdfFile() && isUnder10MB();
+    }
+  }
+}
